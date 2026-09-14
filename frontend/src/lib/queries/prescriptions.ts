@@ -58,3 +58,18 @@ export const useDeletePrescription = () => {
     },
   });
 };
+
+export const useProcessPrescription = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: number): Promise<Prescription> => {
+      const { data } = await api.post(`/prescriptions/${id}/process`);
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["prescriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["prescriptions", variables] });
+    },
+  });
+};

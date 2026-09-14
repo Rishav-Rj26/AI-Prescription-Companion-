@@ -11,6 +11,7 @@ from app.models.prescription_page import PrescriptionPage
 from app.schemas.prescription import PrescriptionResponse, PrescriptionListResponse
 from app.api.deps import get_current_user
 from app.services.storage import upload_prescription_page
+from app.ai.pipeline import process_prescription_pipeline
 
 router = APIRouter()
 
@@ -92,7 +93,11 @@ async def get_prescription(
 ):
     result = await db.execute(
         select(Prescription)
-        .options(selectinload(Prescription.pages))
+        .options(
+            selectinload(Prescription.pages),
+            selectinload(Prescription.medicines),
+            selectinload(Prescription.tests)
+        )
         .where(Prescription.id == id)
         .where(Prescription.user_id == current_user.id)
         .where(Prescription.deleted_at == None)
@@ -121,6 +126,49 @@ async def delete_prescription(
     if not prescription:
         raise HTTPException(status_code=404, detail="Prescription not found")
         
-    from sqlalchemy.sql import func
     prescription.deleted_at = func.now()
     await db.commit()
+
+@router.post("/{id}/process", response_model=PrescriptionResponse)
+async def process_prescription(
+    id: int,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    # 1. Fetch prescription
+    result = await db.execute(
+        select(Prescription)
+        .where(Prescription.id == id)
+        .where(Prescription.user_id == current_user.id)
+        .where(Prescription.deleted_at == None)
+    )
+    prescription = result.scalars().first()
+    
+    if not prescription:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+        
+    if prescription.status != "uploaded" and prescription.status != "failed":
+        raise HTTPException(status_code=400, detail=f"Prescription is already {prescription.status}")
+        
+    # 2. Update status to processing
+    prescription.status = "processing"
+    prescription.failure_reason = None
+    await db.commit()
+    
+    # 3. Run pipeline
+    # Ideally this should be a background task, but for Phase 3 we await it inline
+    await process_prescription_pipeline(prescription.id, db)
+    
+    # 4. Fetch the updated prescription with all relationships to return
+    result = await db.execute(
+        select(Prescription)
+        .options(
+            selectinload(Prescription.pages),
+            selectinload(Prescription.medicines),
+            selectinload(Prescription.tests)
+        )
+        .where(Prescription.id == id)
+    )
+    
+    updated_prescription = result.scalars().first()
+    return updated_prescription

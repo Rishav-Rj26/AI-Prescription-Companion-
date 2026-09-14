@@ -11,6 +11,7 @@ class Prescription(Base):
     
     raw_text = Column(String, nullable=True)
     status = Column(String, default="uploaded") # uploaded, processing, completed, failed
+    failure_reason = Column(String, nullable=True)
     confidence_score = Column(Float, nullable=True)
     needs_verification = Column(Boolean, default=False)
     

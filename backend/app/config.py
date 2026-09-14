@@ -12,6 +12,12 @@ class Settings(BaseSettings):
     AWS_SECRET_ACCESS_KEY: str
     AWS_S3_BUCKET_NAME: str
     AWS_S3_REGION: str = "us-east-1"
+    
+    # AI Settings
+    GOOGLE_API_KEY: str
+    AI_CONFIDENCE_THRESHOLD: float = 0.75
+    AI_MODEL_NAME: str = "gemini-2.5-flash"
+    AI_REQUEST_TIMEOUT: int = 60
 
     class Config:
         env_file = ".env"
