@@ -17,7 +17,9 @@ class Settings(BaseSettings):
     GOOGLE_API_KEY: str
     AI_CONFIDENCE_THRESHOLD: float = 0.75
     AI_MODEL_NAME: str = "gemini-2.5-flash"
+    EMBEDDING_MODEL_NAME: str = "models/text-embedding-004"
     AI_REQUEST_TIMEOUT: int = 60
+    RAG_TOP_K: int = 5
 
     class Config:
         env_file = ".env"

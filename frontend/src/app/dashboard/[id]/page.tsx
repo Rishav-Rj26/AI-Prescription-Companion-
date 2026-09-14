@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, BrainCircuit, AlertTriangle, FileText, Activity, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, BrainCircuit, AlertTriangle, FileText, Activity, AlertCircle, Clock, CheckCircle2, Bot } from "lucide-react";
 import { PrescriptionMedicine } from "@/types/prescription";
 
 export default function PrescriptionViewer({ params }: { params: Promise<{ id: string }> }) {
@@ -191,6 +191,16 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
                     Process with AI
                   </>
                 )}
+              </Button>
+            )}
+
+            {prescription.status === "completed" && (
+              <Button 
+                onClick={() => router.push(`/dashboard/${prescription.id}/chat`)} 
+                className="gap-2 bg-indigo-600 hover:bg-indigo-700"
+              >
+                <Bot className="h-4 w-4" />
+                Chat with AI
               </Button>
             )}
           </div>
