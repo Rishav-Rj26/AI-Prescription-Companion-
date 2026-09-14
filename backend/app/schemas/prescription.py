@@ -63,6 +63,8 @@ class PrescriptionListResponse(BaseModel):
     status: str
     uploaded_at: datetime
     page_count: int
+    medicines_summary: Optional[str] = None
+    test_count: int = 0
 
     class Config:
         from_attributes = True

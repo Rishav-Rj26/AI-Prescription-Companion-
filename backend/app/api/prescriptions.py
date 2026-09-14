@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql import func
 from typing import List
 
 from app.db.database import get_db
@@ -15,6 +16,7 @@ from app.ai.pipeline import process_prescription_pipeline
 from app.models.medicine import PrescriptionMedicine
 from app.models.test import Test
 from app.models.verification_log import VerificationLog
+from app.services.schedule_service import generate_schedules_for_medicine
 
 router = APIRouter()
 
@@ -71,7 +73,11 @@ async def list_prescriptions(
 ):
     result = await db.execute(
         select(Prescription)
-        .options(selectinload(Prescription.pages))
+        .options(
+            selectinload(Prescription.pages),
+            selectinload(Prescription.medicines),
+            selectinload(Prescription.tests)
+        )
         .where(Prescription.user_id == current_user.id)
         .where(Prescription.deleted_at == None)
         .order_by(Prescription.uploaded_at.desc())
@@ -80,11 +86,21 @@ async def list_prescriptions(
     
     response = []
     for p in prescriptions:
+        # Build medicines summary
+        meds = [m.normalized_name or m.extracted_name for m in p.medicines]
+        summary = None
+        if meds:
+            summary = ", ".join(meds[:3])
+            if len(meds) > 3:
+                summary += f" and {len(meds) - 3} more"
+                
         response.append(PrescriptionListResponse(
             id=p.id,
             status=p.status,
             uploaded_at=p.uploaded_at,
-            page_count=len(p.pages)
+            page_count=len(p.pages),
+            medicines_summary=summary,
+            test_count=len(p.tests)
         ))
     return response
 
@@ -205,6 +221,8 @@ async def verify_prescription_fields(
     meds_by_id = {m.id: m for m in prescription.medicines}
     tests_by_id = {t.id: t for t in prescription.tests}
     
+    verified_medicines = set()
+    
     for conf in request.confirmations:
         if conf.medicine_id:
             med = meds_by_id.get(conf.medicine_id)
@@ -228,6 +246,7 @@ async def verify_prescription_fields(
                     confirmed_by=current_user.id
                 )
                 db.add(log)
+                verified_medicines.add(med)
                 
         elif conf.test_id:
             test = tests_by_id.get(conf.test_id)
@@ -246,6 +265,10 @@ async def verify_prescription_fields(
                 db.add(log)
                 
     await db.commit()
+    
+    # Generate schedules for newly verified medicines
+    for med in verified_medicines:
+        await generate_schedules_for_medicine(med, db)
     
     # Refetch to return full updated response
     result = await db.execute(
