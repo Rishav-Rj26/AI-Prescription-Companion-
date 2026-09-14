@@ -10,6 +10,9 @@ export interface PrescriptionPage {
 export interface PrescriptionMedicine {
   id: number;
   extracted_name: string;
+  original_extracted_name: string | null;
+  normalized_name: string | null;
+  suggested_matches: string | null; // JSON string array
   strength: string | null;
   dosage: string | null;
   frequency: string | null;
@@ -17,6 +20,8 @@ export interface PrescriptionMedicine {
   instructions: string | null;
   confidence_score: number | null;
   needs_verification: boolean;
+  verified_by: number | null;
+  verified_at: string | null;
 }
 
 export interface PrescriptionTest {

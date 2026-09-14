@@ -16,6 +16,9 @@ class PrescriptionPageResponse(BaseModel):
 class PrescriptionMedicineResponse(BaseModel):
     id: int
     extracted_name: str
+    original_extracted_name: Optional[str] = None
+    normalized_name: Optional[str] = None
+    suggested_matches: Optional[str] = None
     strength: Optional[str] = None
     dosage: Optional[str] = None
     frequency: Optional[str] = None
@@ -23,6 +26,8 @@ class PrescriptionMedicineResponse(BaseModel):
     instructions: Optional[str] = None
     confidence_score: Optional[float] = None
     needs_verification: bool
+    verified_by: Optional[int] = None
+    verified_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -61,3 +66,12 @@ class PrescriptionListResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class FieldConfirmationRequest(BaseModel):
+    medicine_id: Optional[int] = None
+    test_id: Optional[int] = None
+    field_name: str
+    confirmed_value: str
+
+class VerifyRequest(BaseModel):
+    confirmations: List[FieldConfirmationRequest]

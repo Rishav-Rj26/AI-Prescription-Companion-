@@ -10,6 +10,7 @@ from app.models.medicine import PrescriptionMedicine
 from app.models.test import Test
 from app.ai.preprocessing import download_image_from_url, preprocess_image
 from app.ai.extractor import extract_prescription_data
+from app.ai.normalizer import normalize_prescription_medicines
 from app.config import settings
 from datetime import datetime
 
@@ -93,6 +94,9 @@ async def process_prescription_pipeline(prescription_id: int, db: AsyncSession) 
         prescription.processed_at = datetime.utcnow()
         
         await db.commit()
+        
+        # 6. Post-extraction normalization
+        await normalize_prescription_medicines(prescription.id, db)
         
     except Exception as e:
         logger.error(f"Pipeline failed for prescription {prescription_id}: {e}")

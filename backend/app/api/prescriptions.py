@@ -8,10 +8,13 @@ from app.db.database import get_db
 from app.models.user import User
 from app.models.prescription import Prescription
 from app.models.prescription_page import PrescriptionPage
-from app.schemas.prescription import PrescriptionResponse, PrescriptionListResponse
+from app.schemas.prescription import PrescriptionResponse, PrescriptionListResponse, VerifyRequest
 from app.api.deps import get_current_user
 from app.services.storage import upload_prescription_page
 from app.ai.pipeline import process_prescription_pipeline
+from app.models.medicine import PrescriptionMedicine
+from app.models.test import Test
+from app.models.verification_log import VerificationLog
 
 router = APIRouter()
 
@@ -172,3 +175,86 @@ async def process_prescription(
     
     updated_prescription = result.scalars().first()
     return updated_prescription
+
+@router.post("/{id}/verify", response_model=PrescriptionResponse)
+async def verify_prescription_fields(
+    id: int,
+    request: VerifyRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    # 1. Fetch prescription
+    result = await db.execute(
+        select(Prescription)
+        .options(
+            selectinload(Prescription.medicines),
+            selectinload(Prescription.tests)
+        )
+        .where(Prescription.id == id)
+        .where(Prescription.user_id == current_user.id)
+        .where(Prescription.deleted_at == None)
+    )
+    prescription = result.scalars().first()
+    
+    if not prescription:
+        raise HTTPException(status_code=404, detail="Prescription not found")
+        
+    if prescription.status != "completed":
+        raise HTTPException(status_code=400, detail="Can only verify completed prescriptions")
+
+    meds_by_id = {m.id: m for m in prescription.medicines}
+    tests_by_id = {t.id: t for t in prescription.tests}
+    
+    for conf in request.confirmations:
+        if conf.medicine_id:
+            med = meds_by_id.get(conf.medicine_id)
+            if med:
+                old_val = getattr(med, conf.field_name, None)
+                
+                # If modifying extracted_name for the first time, save original
+                if conf.field_name == "extracted_name" and not med.original_extracted_name:
+                    med.original_extracted_name = med.extracted_name
+                
+                setattr(med, conf.field_name, conf.confirmed_value)
+                med.needs_verification = False
+                med.verified_by = current_user.id
+                med.verified_at = func.now()
+                
+                log = VerificationLog(
+                    prescription_medicine_id=med.id,
+                    field_name=conf.field_name,
+                    old_value=str(old_val) if old_val is not None else None,
+                    new_value=conf.confirmed_value,
+                    confirmed_by=current_user.id
+                )
+                db.add(log)
+                
+        elif conf.test_id:
+            test = tests_by_id.get(conf.test_id)
+            if test:
+                old_val = getattr(test, conf.field_name, None)
+                setattr(test, conf.field_name, conf.confirmed_value)
+                test.needs_verification = False
+                
+                log = VerificationLog(
+                    test_id=test.id,
+                    field_name=conf.field_name,
+                    old_value=str(old_val) if old_val is not None else None,
+                    new_value=conf.confirmed_value,
+                    confirmed_by=current_user.id
+                )
+                db.add(log)
+                
+    await db.commit()
+    
+    # Refetch to return full updated response
+    result = await db.execute(
+        select(Prescription)
+        .options(
+            selectinload(Prescription.pages),
+            selectinload(Prescription.medicines),
+            selectinload(Prescription.tests)
+        )
+        .where(Prescription.id == id)
+    )
+    return result.scalars().first()

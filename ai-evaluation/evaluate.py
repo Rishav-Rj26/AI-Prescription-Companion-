@@ -36,6 +36,12 @@ async def evaluate():
     correct_med_names = 0
     correct_med_details = 0
 
+    # Calibration tracking
+    low_confidence_total = 0
+    low_confidence_errors = 0
+    high_confidence_total = 0
+    high_confidence_errors = 0
+
     print("Starting AI Evaluation...")
     print("-" * 50)
 
@@ -79,8 +85,30 @@ async def evaluate():
                 if not matched:
                     print(f"  [!] Missing Expected Medicine: {exp.get('raw_name')}")
 
-            # Confidence check
+            # Confidence and Calibration check
             print(f"  Overall Confidence: {result.overall_confidence}")
+            
+            # For each extracted med, see if it was correct vs expected
+            for act in actual_meds:
+                is_low_conf = act.needs_verification or act.confidence < 0.75
+                
+                if is_low_conf:
+                    low_confidence_total += 1
+                else:
+                    high_confidence_total += 1
+                    
+                # Was it actually correct?
+                was_correct = False
+                for exp in expected_meds:
+                    if fuzzy_match(exp.get("raw_name"), act.raw_name):
+                        was_correct = True
+                        break
+                        
+                if not was_correct:
+                    if is_low_conf:
+                        low_confidence_errors += 1
+                    else:
+                        high_confidence_errors += 1
             
         except Exception as e:
             print(f"  [X] Failed to process {filename}: {e}")
@@ -93,6 +121,17 @@ async def evaluate():
     print(f"Total Expected Medicines: {total_meds_expected}")
     print(f"Medicine Name Accuracy: {name_accuracy:.1f}% ({correct_med_names}/{total_meds_expected})")
     print(f"Medicine Details Accuracy: {details_accuracy:.1f}% ({correct_med_details}/{total_meds_expected})")
+
+    print("\nCalibration Check (Section 13):")
+    low_conf_error_rate = (low_confidence_errors / low_confidence_total) * 100 if low_confidence_total else 0
+    high_conf_error_rate = (high_confidence_errors / high_confidence_total) * 100 if high_confidence_total else 0
+    print(f"Low Confidence / Flagged Error Rate: {low_conf_error_rate:.1f}% ({low_confidence_errors}/{low_confidence_total})")
+    print(f"High Confidence Error Rate: {high_conf_error_rate:.1f}% ({high_confidence_errors}/{high_confidence_total})")
+    
+    if low_conf_error_rate > high_conf_error_rate:
+        print("  -> Calibration is good: low confidence correctly correlates with higher error rate.")
+    elif high_conf_error_rate > low_conf_error_rate:
+        print("  -> Calibration warning: high confidence fields had more errors than low confidence fields!")
 
     if name_accuracy >= 70:
         print("\nPASSED (Accuracy >= 70%)")

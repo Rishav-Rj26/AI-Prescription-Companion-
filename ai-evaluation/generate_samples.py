@@ -10,7 +10,7 @@ SAMPLES = [
         "filename": "sample_1_single_med.png",
         "text": "Dr. Smith\n\nRx:\nAmoxicillin 500mg\n1 tablet three times a day\nfor 7 days",
         "ground_truth": {
-            "medicines": [{"raw_name": "Amoxicillin", "strength": "500mg", "dosage": "1 tablet", "frequency": "three times a day", "duration": "for 7 days"}],
+            "medicines": [{"raw_name": "Amoxicillin", "normalized_name": "Amoxicillin", "strength": "500mg", "dosage": "1 tablet", "frequency": "three times a day", "duration": "for 7 days"}],
             "tests": []
         }
     },
@@ -19,8 +19,8 @@ SAMPLES = [
         "text": "Dr. Jones Clinic\n\n1. Lisinopril 10mg - 1 tab daily (morning)\n2. Metformin 500mg - 1 tab twice daily with meals\n\nPlease get CBC and Lipid Profile done before next visit.",
         "ground_truth": {
             "medicines": [
-                {"raw_name": "Lisinopril", "strength": "10mg", "dosage": "1 tab", "frequency": "daily (morning)"},
-                {"raw_name": "Metformin", "strength": "500mg", "dosage": "1 tab", "frequency": "twice daily", "instructions": "with meals"}
+                {"raw_name": "Lisinopril", "normalized_name": "Lisinopril", "strength": "10mg", "dosage": "1 tab", "frequency": "daily (morning)"},
+                {"raw_name": "Metformin", "normalized_name": "Metformin", "strength": "500mg", "dosage": "1 tab", "frequency": "twice daily", "instructions": "with meals"}
             ],
             "tests": [{"test_name": "CBC"}, {"test_name": "Lipid Profile"}]
         }
@@ -29,7 +29,7 @@ SAMPLES = [
         "filename": "sample_3_ambiguous.png",
         "text": "Rx\n\nIbuprofen 400mg PRN for pain\nRest for 3 days",
         "ground_truth": {
-            "medicines": [{"raw_name": "Ibuprofen", "strength": "400mg", "dosage": None, "frequency": "PRN", "instructions": "for pain"}],
+            "medicines": [{"raw_name": "Ibuprofen", "normalized_name": "Ibuprofen", "strength": "400mg", "dosage": None, "frequency": "PRN", "instructions": "for pain"}],
             "tests": []
         }
     }

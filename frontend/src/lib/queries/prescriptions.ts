@@ -73,3 +73,17 @@ export const useProcessPrescription = () => {
     },
   });
 };
+
+export const useVerifyPrescription = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, confirmations }: { id: number, confirmations: any[] }): Promise<Prescription> => {
+      const { data } = await api.post(`/prescriptions/${id}/verify`, { confirmations });
+      return data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["prescriptions", variables.id] });
+    },
+  });
+};

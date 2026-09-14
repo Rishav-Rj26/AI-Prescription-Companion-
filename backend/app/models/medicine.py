@@ -9,6 +9,9 @@ class Medicine(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
     generic_name = Column(String, nullable=True)
+    aliases = Column(String, nullable=True)
+    category = Column(String, nullable=True)
+    common_strengths = Column(String, nullable=True)
     description = Column(String, nullable=True)
     source = Column(String, nullable=True) # Citation for explanations
     # For future RAG use
@@ -22,7 +25,11 @@ class PrescriptionMedicine(Base):
     medicine_id = Column(Integer, ForeignKey("medicines.id"), nullable=True) # Could be null if exact match not found
     
     # Extracted fields
+    original_extracted_name = Column(String, nullable=True)
     extracted_name = Column(String, nullable=False) # The raw string from prescription
+    normalized_name = Column(String, nullable=True)
+    suggested_matches = Column(String, nullable=True) # JSON list
+    
     strength = Column(String, nullable=True)
     dosage = Column(String, nullable=True)
     frequency = Column(String, nullable=True)
@@ -31,6 +38,10 @@ class PrescriptionMedicine(Base):
     
     confidence_score = Column(Float, nullable=True)
     needs_verification = Column(Boolean, default=True)
+    
+    from sqlalchemy import DateTime
+    verified_by = Column(Integer, ForeignKey("users.id"), nullable=True)
+    verified_at = Column(DateTime(timezone=True), nullable=True)
 
     prescription = relationship("Prescription", back_populates="medicines")
     medicine = relationship("Medicine")

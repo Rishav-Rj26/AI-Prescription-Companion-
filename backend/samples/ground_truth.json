@@ -3,6 +3,7 @@
     "medicines": [
       {
         "raw_name": "Amoxicillin",
+        "normalized_name": "Amoxicillin",
         "strength": "500mg",
         "dosage": "1 tablet",
         "frequency": "three times a day",
@@ -15,12 +16,14 @@
     "medicines": [
       {
         "raw_name": "Lisinopril",
+        "normalized_name": "Lisinopril",
         "strength": "10mg",
         "dosage": "1 tab",
         "frequency": "daily (morning)"
       },
       {
         "raw_name": "Metformin",
+        "normalized_name": "Metformin",
         "strength": "500mg",
         "dosage": "1 tab",
         "frequency": "twice daily",
@@ -40,6 +43,7 @@
     "medicines": [
       {
         "raw_name": "Ibuprofen",
+        "normalized_name": "Ibuprofen",
         "strength": "400mg",
         "dosage": null,
         "frequency": "PRN",

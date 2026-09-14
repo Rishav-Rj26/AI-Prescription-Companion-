@@ -1,13 +1,15 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { usePrescription, useProcessPrescription } from "@/lib/queries/prescriptions";
+import { usePrescription, useProcessPrescription, useVerifyPrescription } from "@/lib/queries/prescriptions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
 import { ArrowLeft, BrainCircuit, AlertTriangle, FileText, Activity, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { PrescriptionMedicine } from "@/types/prescription";
 
 export default function PrescriptionViewer({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -16,6 +18,10 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
 
   const { data: prescription, isLoading, isError } = usePrescription(prescriptionId);
   const { mutate: processPrescription, isPending: isProcessing, error: processError } = useProcessPrescription();
+  const { mutate: verifyPrescription, isPending: isVerifying } = useVerifyPrescription();
+
+  // Local state for tracking verifications before submitting
+  const [verifications, setVerifications] = useState<{ [medId: number]: string }>({});
 
   if (isLoading) {
     return (
@@ -64,32 +70,86 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
     }
   };
 
-  const getConfidenceBadge = (confidence: number | null, needsVerification: boolean) => {
-    if (needsVerification || (confidence !== null && confidence < 0.75)) {
-      return (
-        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1 ml-2">
-          <AlertTriangle className="h-3 w-3" />
-          Needs Verification
-        </Badge>
-      );
+  const handleVerifySubmit = (medId: number, fieldName: string, value: string) => {
+    verifyPrescription({
+      id: prescription.id,
+      confirmations: [
+        {
+          medicine_id: medId,
+          field_name: fieldName,
+          confirmed_value: value,
+        },
+      ],
+    });
+  };
+
+  const renderMedicineVerification = (med: PrescriptionMedicine) => {
+    if (!med.needs_verification) {
+      if (med.verified_by) {
+        return (
+          <div className="mt-3 flex items-center text-xs text-green-600 bg-green-50 px-3 py-1.5 rounded border border-green-100 w-fit">
+            <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
+            Verified manually on {med.verified_at ? new Date(med.verified_at).toLocaleDateString() : "unknown date"}
+          </div>
+        );
+      }
+      return null;
     }
-    if (confidence !== null && confidence >= 0.9) {
-      return (
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1 ml-2">
-          <CheckCircle2 className="h-3 w-3" />
-          High Confidence
-        </Badge>
-      );
-    }
-    if (confidence !== null) {
-      return (
-        <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 gap-1 ml-2">
-          <Activity className="h-3 w-3" />
-          Medium Confidence
-        </Badge>
-      );
-    }
-    return null;
+
+    const suggested = med.suggested_matches ? JSON.parse(med.suggested_matches) : [];
+    const currentValue = verifications[med.id] !== undefined ? verifications[med.id] : med.extracted_name;
+
+    return (
+      <div className="mt-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+          <div className="flex-1 space-y-3">
+            <div>
+              <h4 className="text-sm font-semibold text-orange-900">Verification Required</h4>
+              <p className="text-xs text-orange-700 mt-0.5">
+                The AI was unsure about this medicine name. Please confirm or correct it.
+              </p>
+            </div>
+
+            {suggested.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-orange-800">Suggested Matches:</p>
+                <div className="flex flex-wrap gap-2">
+                  {suggested.map((suggestion: string) => (
+                    <Button
+                      key={suggestion}
+                      variant={currentValue === suggestion ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setVerifications({ ...verifications, [med.id]: suggestion })}
+                      className={currentValue === suggestion ? "bg-orange-600 hover:bg-orange-700 text-white" : "bg-white text-orange-700 border-orange-300 hover:bg-orange-100"}
+                    >
+                      {suggestion}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <Input
+                value={currentValue}
+                onChange={(e) => setVerifications({ ...verifications, [med.id]: e.target.value })}
+                className="bg-white border-orange-200 h-9"
+                placeholder="Type correct name..."
+              />
+              <Button
+                size="sm"
+                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                onClick={() => handleVerifySubmit(med.id, "extracted_name", currentValue)}
+                disabled={isVerifying || !currentValue.trim()}
+              >
+                Confirm
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -227,14 +287,36 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
                       <div className="divide-y">
                         {prescription.medicines.map((med) => (
                           <div key={med.id} className="p-6 transition-colors hover:bg-gray-50/50">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                               <h3 className="text-lg font-bold text-gray-900 flex items-center flex-wrap">
-                                {med.extracted_name}
-                                {getConfidenceBadge(med.confidence_score, med.needs_verification)}
+                                {med.normalized_name ? (
+                                  <div className="flex items-center gap-2">
+                                    <span>{med.normalized_name}</span>
+                                    {med.extracted_name !== med.normalized_name && (
+                                      <span className="text-xs font-normal text-gray-500 border rounded px-1.5 py-0.5">Raw: {med.extracted_name}</span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span>{med.extracted_name}</span>
+                                )}
+                                
+                                {med.needs_verification ? (
+                                  <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 gap-1 ml-2">
+                                    <AlertTriangle className="h-3 w-3" />
+                                    Needs Verification
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1 ml-2">
+                                    <CheckCircle2 className="h-3 w-3" />
+                                    {med.confidence_score && med.confidence_score >= 0.9 ? "High Confidence" : "Verified"}
+                                  </Badge>
+                                )}
                               </h3>
                             </div>
+
+                            {renderMedicineVerification(med)}
                             
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 mt-4">
                               <div>
                                 <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Strength</p>
                                 <p className="font-medium text-gray-900">{med.strength || "—"}</p>
@@ -280,7 +362,17 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
                           <div key={test.id} className="p-6">
                             <h3 className="text-md font-bold text-gray-900 flex items-center">
                               {test.test_name}
-                              {getConfidenceBadge(test.confidence_score, test.needs_verification)}
+                              {test.needs_verification ? (
+                                <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 gap-1 ml-2">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  Needs Verification
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 gap-1 ml-2">
+                                  <CheckCircle2 className="h-3 w-3" />
+                                  Verified
+                                </Badge>
+                              )}
                             </h3>
                             {test.description && <p className="text-sm text-gray-600 mt-2">{test.description}</p>}
                           </div>
