@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Calendar, Clock, PlusCircle } from "lucide-react";
+import { Home, Calendar, Clock, PlusCircle, Settings, GitCompareArrows } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -12,7 +12,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "Home", href: "/dashboard", icon: Home, exact: true },
     { name: "Schedule", href: "/dashboard/schedule", icon: Calendar, exact: false },
     { name: "History", href: "/dashboard/history", icon: Clock, exact: false },
+    { name: "Compare", href: "/dashboard/compare", icon: GitCompareArrows, exact: false },
     { name: "Upload", href: "/dashboard/upload", icon: PlusCircle, exact: false },
+    { name: "Settings", href: "/dashboard/settings", icon: Settings, exact: false },
   ];
 
   return (

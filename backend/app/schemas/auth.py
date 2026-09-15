@@ -15,10 +15,14 @@ class UserResponse(BaseModel):
     id: int
     email: EmailStr
     full_name: Optional[str]
+    preferred_language: str
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+class UserSettingsUpdate(BaseModel):
+    preferred_language: str
 
 class Token(BaseModel):
     access_token: str

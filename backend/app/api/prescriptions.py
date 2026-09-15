@@ -104,9 +104,13 @@ async def list_prescriptions(
         ))
     return response
 
+from typing import Optional as TypingOptional
+from app.services.translation import translate_instruction
+
 @router.get("/{id}", response_model=PrescriptionResponse)
 async def get_prescription(
     id: int,
+    lang: TypingOptional[str] = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
@@ -125,6 +129,16 @@ async def get_prescription(
     
     if not prescription:
         raise HTTPException(status_code=404, detail="Prescription not found")
+        
+    # Translate instructions if lang is provided
+    if lang and lang != "en":
+        for med in prescription.medicines:
+            if med.instructions:
+                translated, uncertain = await translate_instruction(med.instructions, lang)
+                # Since we don't want to save this to the DB, we just attach it to the object
+                # Pydantic from_attributes will pick it up
+                med.instructions_translated = translated
+                med.translation_uncertain = uncertain
         
     return prescription
 
@@ -281,3 +295,39 @@ async def verify_prescription_fields(
         .where(Prescription.id == id)
     )
     return result.scalars().first()
+
+from app.schemas.comparison import CompareRequest, CompareResponse
+from app.services.comparison import compare_prescriptions
+
+@router.post("/compare", response_model=CompareResponse)
+async def compare_prescriptions_endpoint(
+    request: CompareRequest,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    # Fetch both prescriptions
+    result_a = await db.execute(
+        select(Prescription)
+        .options(selectinload(Prescription.medicines))
+        .where(Prescription.id == request.prescription_id_a)
+        .where(Prescription.user_id == current_user.id)
+        .where(Prescription.deleted_at == None)
+    )
+    presc_a = result_a.scalars().first()
+    
+    result_b = await db.execute(
+        select(Prescription)
+        .options(selectinload(Prescription.medicines))
+        .where(Prescription.id == request.prescription_id_b)
+        .where(Prescription.user_id == current_user.id)
+        .where(Prescription.deleted_at == None)
+    )
+    presc_b = result_b.scalars().first()
+    
+    if not presc_a or not presc_b:
+        raise HTTPException(status_code=404, detail="One or both prescriptions not found")
+        
+    return compare_prescriptions(
+        presc_a.id, presc_a.medicines,
+        presc_b.id, presc_b.medicines
+    )

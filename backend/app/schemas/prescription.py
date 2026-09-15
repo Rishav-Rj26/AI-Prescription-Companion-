@@ -24,6 +24,8 @@ class PrescriptionMedicineResponse(BaseModel):
     frequency: Optional[str] = None
     duration: Optional[str] = None
     instructions: Optional[str] = None
+    instructions_translated: Optional[str] = None
+    translation_uncertain: bool = False
     confidence_score: Optional[float] = None
     needs_verification: bool
     verified_by: Optional[int] = None

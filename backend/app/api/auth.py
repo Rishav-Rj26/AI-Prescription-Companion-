@@ -5,8 +5,9 @@ from typing import Any
 
 from app.db.database import get_db
 from app.models.user import User
-from app.schemas.auth import UserCreate, UserLogin, Token, UserResponse
+from app.schemas.auth import UserCreate, UserLogin, Token, UserResponse, UserSettingsUpdate
 from app.services.auth import get_password_hash, verify_password, create_access_token
+from app.api.deps import get_current_user
 
 router = APIRouter()
 
@@ -51,3 +52,18 @@ async def login(user_in: UserLogin, db: AsyncSession = Depends(get_db)) -> Any:
     # Generate token
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.get("/me", response_model=UserResponse)
+async def get_me(current_user: User = Depends(get_current_user)) -> Any:
+    return current_user
+
+@router.patch("/settings", response_model=UserResponse)
+async def update_settings(
+    settings_in: UserSettingsUpdate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> Any:
+    current_user.preferred_language = settings_in.preferred_language
+    await db.commit()
+    await db.refresh(current_user)
+    return current_user

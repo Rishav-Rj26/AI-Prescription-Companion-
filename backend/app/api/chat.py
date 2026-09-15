@@ -168,7 +168,11 @@ async def send_message(
             "chunk_text": chunk.content
         })
         
-    prompt = f"""{SYSTEM_PROMPT}
+    lang_instruction = ""
+    if current_user.preferred_language != "en":
+        lang_instruction = f"\nCRITICAL RULE 5: You MUST respond in the language code '{current_user.preferred_language}'. However, keep exact medical terms (like medicine names) in their original English form alongside the translation."
+
+    prompt = f"""{SYSTEM_PROMPT}{lang_instruction}
 
 === PRESCRIPTION DATA ===
 {chr(10).join(prescription_data) if prescription_data else 'No data extracted.'}
