@@ -16,8 +16,9 @@ app.add_middleware(
 # Include routers
 app.include_router(health.router)
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
-from .api import prescriptions, chat, sources, schedules
+from .api import prescriptions, chat, sources, schedules, admin
 app.include_router(prescriptions.router, prefix="/prescriptions", tags=["prescriptions"])
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(sources.router, prefix="/sources", tags=["sources"])
 app.include_router(schedules.router, prefix="/schedules", tags=["schedules"])
+app.include_router(admin.router, prefix="/admin/dashboard", tags=["admin"])

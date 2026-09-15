@@ -14,6 +14,8 @@ from app.schemas.chat import CreateSessionRequest, ChatSessionResponse, SendMess
 from app.services.retrieval import retrieve_relevant_chunks
 import google.generativeai as genai
 from app.config import settings
+from app.services.telemetry import log_evaluation_run
+import time
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -186,10 +188,29 @@ USER QUESTION:
 
     # 5. Call LLM
     try:
+        start_time = time.perf_counter()
         response = await model.generate_content_async(prompt)
         assistant_content = response.text
+        latency_ms = int((time.perf_counter() - start_time) * 1000)
+        
+        await log_evaluation_run(
+            run_type="rag_query",
+            model_name=settings.AI_MODEL_NAME,
+            status="pass",
+            prescription_id=session.prescription_id,
+            latency_ms=latency_ms,
+            metric_json={"chunks_retrieved": len(retrieved_chunks)}
+        )
     except Exception as e:
         logger.error(f"LLM call failed: {e}")
+        await log_evaluation_run(
+            run_type="rag_query",
+            model_name=settings.AI_MODEL_NAME,
+            status="fail",
+            prescription_id=session.prescription_id,
+            error_summary=str(e),
+            metric_json={"chunks_retrieved": len(retrieved_chunks)}
+        )
         raise HTTPException(status_code=500, detail="Failed to generate response")
 
     # 6. Save Assistant Message

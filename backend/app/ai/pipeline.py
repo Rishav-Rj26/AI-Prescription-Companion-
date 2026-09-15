@@ -13,6 +13,8 @@ from app.ai.extractor import extract_prescription_data
 from app.ai.normalizer import normalize_prescription_medicines
 from app.config import settings
 from datetime import datetime
+from app.services.telemetry import log_evaluation_run
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +57,9 @@ async def process_prescription_pipeline(prescription_id: int, db: AsyncSession) 
             raise ValueError("No valid images found for prescription.")
             
         # 4. Extract data using Gemini
+        start_time = time.perf_counter()
         extraction_result = await extract_prescription_data(image_bytes_list)
+        latency_ms = int((time.perf_counter() - start_time) * 1000)
         
         # 5. Apply confidence threshold and write to DB
         threshold = settings.AI_CONFIDENCE_THRESHOLD
@@ -98,6 +102,16 @@ async def process_prescription_pipeline(prescription_id: int, db: AsyncSession) 
         # 6. Post-extraction normalization
         await normalize_prescription_medicines(prescription.id, db)
         
+        # Log successful telemetry
+        await log_evaluation_run(
+            run_type="extraction",
+            model_name=settings.AI_MODEL_NAME,
+            status="pass",
+            prescription_id=prescription.id,
+            confidence_score=extraction_result.overall_confidence,
+            latency_ms=latency_ms
+        )
+        
     except Exception as e:
         logger.error(f"Pipeline failed for prescription {prescription_id}: {e}")
         await db.rollback()
@@ -108,3 +122,11 @@ async def process_prescription_pipeline(prescription_id: int, db: AsyncSession) 
             prescription.status = "failed"
             prescription.failure_reason = str(e)[:255] # Truncate to fit
             await db.commit()
+            
+        await log_evaluation_run(
+            run_type="extraction",
+            model_name=settings.AI_MODEL_NAME,
+            status="fail",
+            prescription_id=prescription_id,
+            error_summary=str(e)
+        )

@@ -6,6 +6,7 @@ export interface User {
   email: string;
   full_name: string | null;
   preferred_language: string;
+  is_admin: boolean;
   created_at: string;
 }
 

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Calendar, Clock, PlusCircle, Settings, GitCompareArrows } from "lucide-react";
+import { Home, Calendar, Clock, PlusCircle, Settings, GitCompareArrows, ShieldAlert } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCurrentUser } from "@/lib/queries/user";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,6 +17,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     { name: "Upload", href: "/dashboard/upload", icon: PlusCircle, exact: false },
     { name: "Settings", href: "/dashboard/settings", icon: Settings, exact: false },
   ];
+
+  const { data: user } = useCurrentUser();
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50/50">
@@ -48,6 +51,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </li>
               );
             })}
+            
+            {user?.is_admin && (
+              <li className="pt-4 mt-4 border-t">
+                <Link
+                  href="/admin/dashboard"
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors text-red-600 hover:bg-red-50",
+                    pathname.startsWith("/admin") && "bg-red-50 text-red-700"
+                  )}
+                >
+                  <ShieldAlert className="h-5 w-5 text-red-600" />
+                  Admin Dashboard
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       </nav>
