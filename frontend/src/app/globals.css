@@ -8,130 +8,149 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Plus Jakarta Sans', var(--font-sans);
+  /* ===== Font Family ===== */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono);
-  --font-heading: 'Plus Jakarta Sans', var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Clinical Serenity Design System - Custom Tokens */
-  --color-clinical-navy: #1e4263;
-  --color-clinical-navy-deep: #002c4b;
-  --color-healing-teal: #2e7977;
-  --color-healing-teal-light: #a4edea;
-  --color-verification-amber: #b45309;
-  --color-clinical-green: #15803d;
-  --color-clinical-green-light: #edf7ee;
-  --color-clinical-surface: #f6f8fa;
-  --color-clinical-muted: #4a5866;
-  --color-clinical-text: #192128;
-  --color-clinical-border: #e6ecf1;
-  --color-clinical-border-hover: #d6e0ea;
-}
+  /* ===== Stitch MD3 Color Tokens (exact from Tailwind config) ===== */
+  --color-surface-container-low: #ecf4fe;
+  --color-secondary-fixed: #a7efec;
+  --color-outline: #73777e;
+  --color-inverse-surface: #293139;
+  --color-surface-dim: #d3dbe4;
+  --color-primary-container: #1e4263;
+  --color-on-secondary-container: #1f6d6b;
+  --color-secondary-fixed-dim: #8bd3d0;
+  --color-on-tertiary-fixed: #331200;
+  --color-surface-bright: #f6f9ff;
+  --color-on-background: #141c23;
+  --color-tertiary: #491d00;
+  --color-tertiary-fixed-dim: #ffb68e;
+  --color-on-tertiary-fixed-variant: #763300;
+  --color-secondary: #186967;
+  --color-on-error: #ffffff;
+  --color-on-primary-fixed-variant: #26496a;
+  --color-surface-container-highest: #dbe3ed;
+  --color-outline-variant: #c3c7ce;
+  --color-inverse-primary: #a8caf1;
+  --color-surface-tint: #3f6184;
+  --color-on-surface: #141c23;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-primary: #ffffff;
+  --color-surface-container: #e7eff9;
+  --color-tertiary-container: #6b2d00;
+  --color-on-primary-fixed: #001d34;
+  --color-inverse-on-surface: #eaf2fb;
+  --color-on-secondary: #ffffff;
+  --color-background: #f6f9ff;
+  --color-on-error-container: #93000a;
+  --color-tertiary-fixed: #ffdbca;
+  --color-primary: #002c4b;
+  --color-on-tertiary-container: #ff8d47;
+  --color-on-secondary-fixed: #00201f;
+  --color-error: #ba1a1a;
+  --color-on-secondary-fixed-variant: #00504e;
+  --color-surface-variant: #dbe3ed;
+  --color-error-container: #ffdad6;
+  --color-primary-fixed-dim: #a8caf1;
+  --color-primary-fixed: #d0e4ff;
+  --color-surface: #f6f9ff;
+  --color-secondary-container: #a4edea;
+  --color-surface-container-high: #e1e9f3;
+  --color-on-surface-variant: #42474e;
+  --color-on-primary-container: #8daed5;
+  --color-on-tertiary: #ffffff;
+  --color-on-secondary-fixed-variant-color: #00504e;
 
-:root {
-  --background: #f6f9ff;
-  --foreground: #192128;
-  --card: #ffffff;
-  --card-foreground: #192128;
-  --popover: #ffffff;
-  --popover-foreground: #192128;
-  --primary: #1e4263;
-  --primary-foreground: #ffffff;
-  --secondary: #2e7977;
-  --secondary-foreground: #ffffff;
-  --muted: #e7eff9;
-  --muted-foreground: #4a5866;
-  --accent: #e7eff9;
-  --accent-foreground: #1e4263;
-  --destructive: #ba1a1a;
-  --border: #e6ecf1;
-  --input: #e6ecf1;
-  --ring: #1e4263;
-  --chart-1: #1e4263;
-  --chart-2: #2e7977;
-  --chart-3: #b45309;
-  --chart-4: #15803d;
-  --chart-5: #7c3aed;
-  --radius: 0.75rem;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #192128;
-  --sidebar-primary: #1e4263;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ecf4fe;
-  --sidebar-accent-foreground: #1e4263;
-  --sidebar-border: #e6ecf1;
-  --sidebar-ring: #1e4263;
-}
+  /* ===== Stitch Typography Tokens ===== */
+  --font-label-md: 'Plus Jakarta Sans';
+  --font-label-lg: 'Plus Jakarta Sans';
+  --font-headline-xl: 'Plus Jakarta Sans';
+  --font-headline-sm: 'Plus Jakarta Sans';
+  --font-headline-lg-mobile: 'Plus Jakarta Sans';
+  --font-code-pill: 'Plus Jakarta Sans';
+  --font-body-xl: 'Plus Jakarta Sans';
+  --font-body-lg: 'Plus Jakarta Sans';
+  --font-headline-xl-mobile: 'Plus Jakarta Sans';
+  --font-headline-md: 'Plus Jakarta Sans';
+  --font-body-md: 'Plus Jakarta Sans';
+  --font-headline-lg: 'Plus Jakarta Sans';
+  --font-label-sm: 'Plus Jakarta Sans';
 
-.dark {
-  --background: #0f1720;
-  --foreground: #e1e9f3;
-  --card: #192128;
-  --card-foreground: #e1e9f3;
-  --popover: #192128;
-  --popover-foreground: #e1e9f3;
-  --primary: #a8caf1;
-  --primary-foreground: #002c4b;
-  --secondary: #8bd3d0;
-  --secondary-foreground: #00201f;
-  --muted: #293139;
-  --muted-foreground: #8b9aab;
-  --accent: #293139;
-  --accent-foreground: #e1e9f3;
-  --destructive: #ffa4a4;
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.15);
-  --ring: #a8caf1;
-  --chart-1: #a8caf1;
-  --chart-2: #8bd3d0;
-  --chart-3: #ffb68e;
-  --chart-4: #86efac;
-  --chart-5: #c4b5fd;
-  --sidebar: #192128;
-  --sidebar-foreground: #e1e9f3;
-  --sidebar-primary: #a8caf1;
-  --sidebar-primary-foreground: #002c4b;
-  --sidebar-accent: #293139;
-  --sidebar-accent-foreground: #e1e9f3;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #a8caf1;
+  --text-label-md: 13px;
+  --text-label-md--line-height: 18px;
+  --text-label-lg: 15px;
+  --text-label-lg--line-height: 20px;
+  --text-headline-xl: 36px;
+  --text-headline-xl--line-height: 44px;
+  --text-headline-sm: 19px;
+  --text-headline-sm--line-height: 26px;
+  --text-headline-lg-mobile: 24px;
+  --text-headline-lg-mobile--line-height: 32px;
+  --text-code-pill: 12px;
+  --text-code-pill--line-height: 16px;
+  --text-body-xl: 19px;
+  --text-body-xl--line-height: 30px;
+  --text-body-lg: 17px;
+  --text-body-lg--line-height: 26px;
+  --text-headline-xl-mobile: 28px;
+  --text-headline-xl-mobile--line-height: 36px;
+  --text-headline-md: 22px;
+  --text-headline-md--line-height: 30px;
+  --text-body-md: 15px;
+  --text-body-md--line-height: 24px;
+  --text-headline-lg: 30px;
+  --text-headline-lg--line-height: 38px;
+  --text-label-sm: 12px;
+  --text-label-sm--line-height: 16px;
+
+  /* ===== Stitch Spacing ===== */
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-xl: 2.25rem;
+  --spacing-gutter: 1.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-margin: 1.5rem;
+
+  /* ===== Stitch Border Radii ===== */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+
+  /* ===== Shadcn Compatibility ===== */
+  --color-foreground: #141c23;
+  --color-card: #ffffff;
+  --color-card-foreground: #141c23;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #141c23;
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #e7eff9;
+  --color-muted-foreground: #42474e;
+  --color-accent: #e7eff9;
+  --color-accent-foreground: #002c4b;
+  --color-destructive: #ba1a1a;
+  --color-border: #c3c7ce;
+  --color-input: #c3c7ce;
+  --color-ring: #002c4b;
+  --color-chart-1: #002c4b;
+  --color-chart-2: #186967;
+  --color-chart-3: #b45309;
+  --color-chart-4: #15803d;
+  --color-chart-5: #7c3aed;
+
+  --color-sidebar: #ffffff;
+  --color-sidebar-foreground: #141c23;
+  --color-sidebar-primary: #002c4b;
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: #ecf4fe;
+  --color-sidebar-accent-foreground: #002c4b;
+  --color-sidebar-border: #c3c7ce;
+  --color-sidebar-ring: #002c4b;
 }
 
 @layer base {
@@ -139,30 +158,29 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-on-surface antialiased;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  }
-  html {
-    @apply font-sans;
+    font-size: 15px;
+    line-height: 24px;
   }
 }
 
-/* Clinical Serenity Elevation System */
+/* ===== Clinical Serenity Elevation System (exact from Stitch) ===== */
 @layer utilities {
   .tier-1-card {
     box-shadow: 0 1px 3px rgba(25, 33, 40, 0.04), 0 6px 16px rgba(30, 66, 99, 0.04);
-    border: 1px solid #e6ecf1;
+    border: 1px solid #E6ECF1;
   }
 
   .tier-2-floating {
     box-shadow: 0 4px 12px rgba(25, 33, 40, 0.06), 0 16px 32px rgba(30, 66, 99, 0.08);
-    border: 1px solid #d6e0ea;
+    border: 1px solid #D6E0EA;
   }
 
   .clinical-focus {
     outline: 2px solid #ffffff;
     outline-offset: 2px;
-    box-shadow: 0 0 0 4px #1e4263;
+    box-shadow: 0 0 0 4px #002c4b;
   }
 
   .tabular-nums {

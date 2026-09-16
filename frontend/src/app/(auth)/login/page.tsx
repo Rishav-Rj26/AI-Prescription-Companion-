@@ -50,11 +50,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-cyan-50 p-4">
-      <Card className="w-full max-w-md shadow-xl border-0 ring-1 ring-black/5">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md tier-1-card border-outline-variant/60 rounded-2xl">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Welcome back</CardTitle>
-          <CardDescription className="text-center">
+          <CardTitle className="text-2xl font-headline-md text-primary text-center">Welcome back</CardTitle>
+          <CardDescription className="text-center font-body-md text-on-surface-variant">
             Enter your credentials to access your account
           </CardDescription>
         </CardHeader>
@@ -62,7 +62,7 @@ export default function LoginPage() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               {error && (
-                <div className="p-3 text-sm font-medium text-red-500 bg-red-50 rounded-md">
+                <div className="p-3 text-sm font-medium text-error bg-error-container/20 border border-error-container rounded-lg">
                   {error}
                 </div>
               )}
@@ -72,11 +72,11 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-on-surface font-label-md">Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="m@example.com" {...field} />
+                      <Input type="email" placeholder="m@example.com" className="bg-surface-container-lowest border-outline-variant focus-visible:ring-primary h-12 rounded-xl" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-error" />
                   </FormItem>
                 )}
               />
@@ -87,29 +87,29 @@ export default function LoginPage() {
                 render={({ field }) => (
                   <FormItem>
                     <div className="flex items-center justify-between">
-                      <FormLabel>Password</FormLabel>
-                      <Link href="#" className="text-xs text-indigo-600 hover:underline">
+                      <FormLabel className="text-on-surface font-label-md">Password</FormLabel>
+                      <Link href="#" className="text-xs text-secondary hover:underline font-label-sm">
                         Forgot password?
                       </Link>
                     </div>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" className="bg-surface-container-lowest border-outline-variant focus-visible:ring-primary h-12 rounded-xl" {...field} />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-error" />
                   </FormItem>
                 )}
               />
               
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+              <Button type="submit" className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-label-lg" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? "Logging in..." : "Log In"}
               </Button>
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <p className="text-sm text-gray-600">
+        <CardFooter className="flex justify-center border-t border-surface-container pt-6">
+          <p className="text-sm font-body-md text-on-surface-variant">
             Don't have an account?{" "}
-            <Link href="/signup" className="text-indigo-600 hover:underline font-semibold">
+            <Link href="/signup" className="text-secondary hover:underline font-semibold">
               Sign up
             </Link>
           </p>

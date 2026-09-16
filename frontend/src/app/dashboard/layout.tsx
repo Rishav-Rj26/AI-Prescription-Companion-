@@ -1,100 +1,95 @@
-"use client";
+import Link from 'next/link';
+import { Pill, Plus, HelpCircle, FileText, Calendar, Activity, ShieldCheck, Lock } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Calendar, Clock, PlusCircle, Settings, GitCompareArrows, ShieldAlert, Pill } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useCurrentUser } from "@/lib/queries/user";
-
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-
-  const navigation = [
-    { name: "Home", href: "/dashboard", icon: Home, exact: true },
-    { name: "Schedule", href: "/dashboard/schedule", icon: Calendar, exact: false },
-    { name: "History", href: "/dashboard/history", icon: Clock, exact: false },
-    { name: "Compare", href: "/dashboard/compare", icon: GitCompareArrows, exact: false },
-    { name: "Upload", href: "/dashboard/upload", icon: PlusCircle, exact: false },
-    { name: "Settings", href: "/dashboard/settings", icon: Settings, exact: false },
-  ];
-
-  const { data: user } = useCurrentUser();
-
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f6f8fa]">
-      {/* Sidebar Navigation */}
-      <nav className="w-64 flex-shrink-0 border-r border-[#e6ecf1] bg-white flex flex-col">
-        <div className="p-5 border-b border-[#e6ecf1]">
-          <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#1e4263] text-white flex items-center justify-center shadow-sm">
-              <Pill className="h-5 w-5" />
-            </div>
-            <span className="text-[15px] font-bold text-[#1e4263] tracking-tight">
-              Prescription AI
-            </span>
-          </Link>
-        </div>
-        <div className="flex-1 overflow-y-auto py-4">
-          <ul className="space-y-1 px-3">
-            {navigation.map((item) => {
-              const isActive = item.exact 
-                ? pathname === item.href 
-                : pathname.startsWith(item.href);
-                
-              return (
-                <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-medium transition-all duration-150",
-                      isActive
-                        ? "bg-[#ecf4fe] text-[#1e4263] font-semibold shadow-sm"
-                        : "text-[#4a5866] hover:bg-[#f6f8fa] hover:text-[#1e4263]"
-                    )}
-                  >
-                    <item.icon className={cn("h-[18px] w-[18px]", isActive ? "text-[#1e4263]" : "text-[#73777e]")} />
-                    {item.name}
-                  </Link>
-                </li>
-              );
-            })}
+    <div className="bg-background text-on-surface antialiased min-h-screen flex flex-col justify-between selection:bg-surface-container selection:text-primary">
+      {/* Top Navigation Shell */}
+      <header className="bg-surface-container-lowest border-b border-outline-variant shadow-sm sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-6 md:px-space-xl flex justify-between items-center h-20 w-full">
+          {/* Brand Logo & Nav */}
+          <div className="flex items-center gap-8">
+            <Link href="/dashboard" className="font-headline-sm text-headline-sm text-primary font-bold flex items-center gap-2 tracking-tight">
+              <span className="w-10 h-10 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
+                <Pill className="h-6 w-6" />
+              </span>
+              <span className="hidden md:inline">AI Prescription Companion</span>
+            </Link>
             
-            {user?.is_admin && (
-              <li className="pt-4 mt-4 border-t border-[#e6ecf1]">
-                <Link
-                  href="/admin/dashboard"
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-medium transition-all duration-150 text-[#ba1a1a] hover:bg-[#ffdad6]/30",
-                    pathname.startsWith("/admin") && "bg-[#ffdad6]/40 text-[#93000a] font-semibold"
-                  )}
-                >
-                  <ShieldAlert className="h-[18px] w-[18px]" />
-                  Admin Dashboard
-                </Link>
-              </li>
-            )}
-          </ul>
-        </div>
-        {/* User info footer */}
-        {user && (
-          <div className="p-4 border-t border-[#e6ecf1]">
-            <div className="flex items-center gap-3 px-2">
-              <div className="w-8 h-8 rounded-full bg-[#ecf4fe] text-[#1e4263] flex items-center justify-center text-[13px] font-bold">
-                {(user.full_name || user.email || "U").charAt(0).toUpperCase()}
+            {/* Desktop Navigation Items */}
+            <nav className="hidden lg:flex items-center gap-6 pt-1">
+              <Link href="/dashboard/history" className="text-on-surface-variant hover:text-primary transition-colors font-label-lg text-label-lg">Prescriptions</Link>
+              <Link href="/dashboard/schedule" className="text-on-surface-variant hover:text-primary transition-colors font-label-lg text-label-lg">Schedule</Link>
+              <Link href="/dashboard/compare" className="text-on-surface-variant hover:text-primary transition-colors font-label-lg text-label-lg">Compare</Link>
+              <Link href="/dashboard/settings" className="text-on-surface-variant hover:text-primary transition-colors font-label-lg text-label-lg">Settings</Link>
+            </nav>
+          </div>
+          
+          {/* Trailing Action & User Profile */}
+          <div className="flex items-center gap-4">
+            {/* Upload CTA */}
+            <Link href="/dashboard/upload" className="hidden sm:inline-flex bg-primary-container text-on-primary font-label-md text-label-md px-4 py-2 rounded-xl hover:brightness-110 active:scale-95 transition-all items-center gap-2 shadow-sm">
+              <Plus className="h-4 w-4" />
+              <span>Upload New</span>
+            </Link>
+            
+            {/* Help Action */}
+            <button className="p-2 text-on-surface-variant hover:text-primary rounded-lg transition-colors" title="Clinical Help Desk">
+              <HelpCircle className="h-5 w-5" />
+            </button>
+            
+            {/* Divider */}
+            <div className="h-6 w-px bg-outline-variant hidden sm:block"></div>
+            
+            {/* User Profile Pill */}
+            <div className="flex items-center gap-3 pl-1 cursor-pointer hover:bg-surface-container-low p-1.5 rounded-xl transition-colors">
+              <div className="w-9 h-9 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-md text-label-md shadow-sm">
+                AP
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-semibold text-[#192128] truncate">{user.full_name || "User"}</p>
-                <p className="text-[12px] text-[#73777e] truncate">{user.email}</p>
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="font-label-sm text-label-sm text-on-surface leading-tight font-bold">Arthur P.</span>
+                <span className="font-label-sm text-[11px] text-secondary leading-tight">Patient Account</span>
               </div>
             </div>
           </div>
-        )}
-      </nav>
+        </div>
+      </header>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
+      {/* Reassuring HIPAA & Clinical Encryption Banner */}
+      <section className="bg-surface-container-low border-b border-outline-variant">
+        <div className="max-w-7xl mx-auto px-6 md:px-space-xl py-2.5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 text-on-surface-variant">
+            <ShieldCheck className="h-5 w-5 text-secondary" />
+            <p className="font-label-sm text-[12px] leading-snug">
+              <strong className="text-on-surface font-semibold">Encrypted & HIPAA Compliant Protocol Active</strong> • Your health information is stored with end-to-end AES-256 encryption.
+            </p>
+          </div>
+          <div className="hidden md:flex items-center gap-1.5 text-secondary font-label-sm text-[12px] font-bold tracking-wide uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+            <span>AES-256 Active</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Canvas */}
+      <main className="w-full flex-grow">
         {children}
       </main>
+      
+      {/* Simple Footer */}
+      <footer className="border-t border-outline-variant bg-surface-container-lowest mt-12 py-8 text-center text-sm text-on-surface-variant font-label-sm">
+         <p>© 2025 AI Prescription Companion, Inc. All rights reserved.</p>
+         <div className="flex justify-center gap-4 mt-2">
+           <a href="#" className="hover:text-primary">Privacy</a>
+           <a href="#" className="hover:text-primary">Terms</a>
+           <a href="#" className="hover:text-primary">HIPAA Notice</a>
+         </div>
+      </footer>
     </div>
   );
 }
