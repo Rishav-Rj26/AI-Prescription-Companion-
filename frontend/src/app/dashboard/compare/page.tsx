@@ -45,7 +45,7 @@ export default function ComparePage() {
           <div className="flex flex-col md:flex-row items-end gap-4">
             <div className="flex-1 w-full space-y-2">
               <label className="text-sm font-medium">Prescription A (Older)</label>
-              <Select value={prescA} onValueChange={setPrescA}>
+              <Select value={prescA} onValueChange={(v) => setPrescA(v || "")}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select first prescription" />
                 </SelectTrigger>
@@ -65,7 +65,7 @@ export default function ComparePage() {
 
             <div className="flex-1 w-full space-y-2">
               <label className="text-sm font-medium">Prescription B (Newer)</label>
-              <Select value={prescB} onValueChange={setPrescB}>
+              <Select value={prescB} onValueChange={(v) => setPrescB(v || "")}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select second prescription" />
                 </SelectTrigger>

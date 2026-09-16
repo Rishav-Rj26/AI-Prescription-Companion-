@@ -96,16 +96,16 @@ export default function HistoryPage() {
                   </CardTitle>
                   <CardDescription>
                     {p.page_count} page{p.page_count !== 1 ? 's' : ''}
-                    {p.test_count > 0 && ` • ${p.test_count} tests`}
+                    {(p.test_count ?? 0) > 0 && ` • ${p.test_count} tests`}
                   </CardDescription>
                 </CardHeader>
                 <CardFooter className="pt-0">
-                  <Button variant="ghost" className="w-full justify-between group-hover:text-indigo-600" asChild>
-                    <Link href={`/dashboard/${p.id}`}>
+                  <Link href={`/dashboard/${p.id}`} className="w-full">
+                    <Button variant="ghost" className="w-full justify-between group-hover:text-indigo-600">
                       View Details
                       <ArrowRight className="h-4 w-4 ml-2" />
-                    </Link>
-                  </Button>
+                    </Button>
+                  </Link>
                 </CardFooter>
               </Card>
             ))}

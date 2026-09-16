@@ -10,6 +10,9 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Send, User as UserIcon, Bot, BookOpen, Loader2, Info } from "lucide-react";
 import { ChatSession, ChatMessage, Citation } from "@/types/chat";
+import { VoiceInputButton } from "@/components/ui/voice-input-button";
+import { TextToSpeechButton } from "@/components/ui/text-to-speech-button";
+import { useCurrentUser } from "@/lib/queries/user";
 import api from "@/lib/api";
 
 export default function ChatPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,6 +27,7 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
 
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const { data: activeSession, isLoading: sessionLoading, refetch } = useChatSession(activeSessionId || 0);
+  const { data: user } = useCurrentUser();
 
   const [inputMessage, setInputMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -152,11 +156,21 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                 {msg.role === 'user' ? <UserIcon className="h-4 w-4 text-gray-600" /> : <Bot className="h-4 w-4 text-white" />}
               </div>
               
-              <div className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+              <div className={`max-w-[85%] rounded-2xl px-4 py-3 relative ${
                 msg.role === 'user' 
                   ? 'bg-gray-900 text-white rounded-tr-sm' 
-                  : 'bg-white border shadow-sm rounded-tl-sm text-gray-800'
+                  : 'bg-white border shadow-sm rounded-tl-sm text-gray-800 pr-10'
               }`}>
+                {msg.role === 'assistant' && (
+                  <div className="absolute top-2 right-2">
+                    <TextToSpeechButton 
+                      text={msg.content} 
+                      language={user?.preferred_language || "en"} 
+                      size="icon" 
+                      className="h-7 w-7 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-full" 
+                    />
+                  </div>
+                )}
                 {renderMessageContent(msg.content, msg.citations)}
               </div>
             </div>
@@ -182,13 +196,24 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       <footer className="bg-white border-t p-4 shrink-0">
         <div className="max-w-3xl mx-auto">
           <form onSubmit={handleSend} className="flex gap-2">
-            <Input 
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Ask a question about this prescription..."
-              className="flex-1 shadow-sm"
-              disabled={isSending}
-            />
+            <div className="flex-1 relative">
+              <Input 
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                placeholder="Ask a question about this prescription..."
+                className="w-full shadow-sm pr-12"
+                disabled={isSending}
+              />
+              <div className="absolute right-1 top-1">
+                <VoiceInputButton 
+                  language={user?.preferred_language || "en"}
+                  disabled={isSending}
+                  onTranscriptComplete={(transcript) => {
+                    setInputMessage(prev => (prev ? prev + " " + transcript : transcript));
+                  }}
+                />
+              </div>
+            </div>
             <Button type="submit" disabled={!inputMessage.trim() || isSending} className="bg-indigo-600 hover:bg-indigo-700">
               <Send className="h-4 w-4" />
             </Button>

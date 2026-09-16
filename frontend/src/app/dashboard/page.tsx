@@ -65,9 +65,9 @@ export default function DashboardHomePage() {
                 </CardTitle>
                 <CardDescription>Your next scheduled medications for today</CardDescription>
               </div>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/dashboard/schedule">Full Schedule</Link>
-              </Button>
+              <Link href="/dashboard/schedule">
+                <Button variant="outline" size="sm">Full Schedule</Button>
+              </Link>
             </CardHeader>
             <CardContent>
               {loadingSched ? (

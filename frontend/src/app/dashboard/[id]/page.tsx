@@ -10,6 +10,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, BrainCircuit, AlertTriangle, FileText, Activity, AlertCircle, Clock, CheckCircle2, Bot } from "lucide-react";
 import { PrescriptionMedicine } from "@/types/prescription";
+import { TextToSpeechButton } from "@/components/ui/text-to-speech-button";
+import { useCurrentUser } from "@/lib/queries/user";
 
 export default function PrescriptionViewer({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -19,6 +21,7 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
   const { data: prescription, isLoading, isError } = usePrescription(prescriptionId);
   const { mutate: processPrescription, isPending: isProcessing, error: processError } = useProcessPrescription();
   const { mutate: verifyPrescription, isPending: isVerifying } = useVerifyPrescription();
+  const { data: user } = useCurrentUser();
 
   // Local state for tracking verifications before submitting
   const [verifications, setVerifications] = useState<{ [medId: number]: string }>({});
@@ -150,6 +153,17 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
         </div>
       </div>
     );
+  };
+
+  const getMedicineAudioText = (med: PrescriptionMedicine) => {
+    const parts = [];
+    parts.push(med.normalized_name || med.extracted_name);
+    if (med.strength) parts.push(`Strength: ${med.strength}`);
+    if (med.dosage) parts.push(`Dosage: ${med.dosage}`);
+    if (med.frequency) parts.push(`Frequency: ${med.frequency}`);
+    if (med.duration) parts.push(`Duration: ${med.duration}`);
+    if (med.instructions) parts.push(`Instructions: ${med.instructions}`);
+    return parts.join(". ");
   };
 
   return (
@@ -322,6 +336,12 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
                                   </Badge>
                                 )}
                               </h3>
+                              <TextToSpeechButton 
+                                text={getMedicineAudioText(med)} 
+                                language={user?.preferred_language || "en"} 
+                                size="sm"
+                                className="h-8 w-8 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100" 
+                              />
                             </div>
 
                             {renderMedicineVerification(med)}

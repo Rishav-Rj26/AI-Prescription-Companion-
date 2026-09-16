@@ -2,7 +2,7 @@ export interface PrescriptionPage {
   id: number;
   file_url: string;
   file_type: string;
-  page_number: int;
+  page_number: number;
   original_filename: string | null;
   file_size_bytes: number | null;
 }
@@ -51,4 +51,6 @@ export interface PrescriptionListResponse {
   status: "uploaded" | "processing" | "completed" | "failed";
   uploaded_at: string;
   page_count: number;
+  test_count?: number;
+  medicines_summary?: string;
 }

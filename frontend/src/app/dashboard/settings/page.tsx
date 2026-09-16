@@ -59,7 +59,7 @@ export default function SettingsPage() {
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Primary Language
               </label>
-              <Select value={language} onValueChange={setLanguage}>
+              <Select value={language} onValueChange={(v) => setLanguage(v || "en")}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a language" />
                 </SelectTrigger>
