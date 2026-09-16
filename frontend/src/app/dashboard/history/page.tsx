@@ -13,11 +13,11 @@ export default function HistoryPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "uploaded": return "bg-blue-100 text-blue-800 border-blue-200";
-      case "processing": return "bg-amber-100 text-amber-800 border-amber-200";
-      case "completed": return "bg-green-100 text-green-800 border-green-200";
-      case "failed": return "bg-red-100 text-red-800 border-red-200";
-      default: return "bg-gray-100 text-gray-800";
+      case "uploaded": return "bg-blue-100 text-[#1e4263] border-[#a8caf1]";
+      case "processing": return "bg-[#fef7ea] text-[#78350f] border-[#f5d59a]";
+      case "completed": return "bg-[#edf7ee] text-[#14532d] border-[#b8e2be]";
+      case "failed": return "bg-[#ffdad6] text-[#93000a] border-[#ffa4a4]";
+      default: return "bg-[#f6f8fa] text-gray-800";
     }
   };
 
@@ -33,8 +33,8 @@ export default function HistoryPage() {
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900">History</h1>
-            <p className="text-gray-500 mt-1">Review your past uploaded prescriptions.</p>
+            <h1 className="text-3xl font-bold tracking-tight text-[#192128]">History</h1>
+            <p className="text-[#4a5866] mt-1">Review your past uploaded prescriptions.</p>
           </div>
           <Link href="/dashboard/upload">
             <Button className="gap-2">
@@ -46,21 +46,21 @@ export default function HistoryPage() {
 
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#1e4263]" />
           </div>
         ) : isError ? (
-          <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 text-center">
+          <div className="p-4 bg-[#ffdad6]/50 text-[#93000a] rounded-lg border border-[#ffa4a4] text-center">
             Failed to load prescriptions. Please try again later.
           </div>
         ) : prescriptions?.length === 0 ? (
           <Card className="border-dashed bg-transparent shadow-none">
             <CardContent className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-              <div className="p-4 bg-indigo-50 rounded-full">
-                <FileText className="h-10 w-10 text-indigo-500" />
+              <div className="p-4 bg-[#ecf4fe] rounded-full">
+                <FileText className="h-10 w-10 text-[#1e4263]" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold">No history yet</h3>
-                <p className="text-gray-500 max-w-sm mt-1">
+                <p className="text-[#4a5866] max-w-sm mt-1">
                   Upload your first prescription image or PDF to get AI-powered insights.
                 </p>
               </div>
@@ -77,7 +77,7 @@ export default function HistoryPage() {
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="absolute top-4 right-4 text-gray-400 hover:text-red-600 hover:bg-red-50"
+                    className="absolute top-4 right-4 text-[#73777e] hover:text-[#ba1a1a] hover:bg-[#ffdad6]/30"
                     onClick={(e) => handleDelete(e, p.id)}
                     disabled={isDeleting}
                   >
@@ -87,7 +87,7 @@ export default function HistoryPage() {
                     <Badge variant="outline" className={getStatusColor(p.status)}>
                       {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
                     </Badge>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-[#73777e]">
                       {new Date(p.uploaded_at).toLocaleDateString()}
                     </span>
                   </div>
@@ -101,7 +101,7 @@ export default function HistoryPage() {
                 </CardHeader>
                 <CardFooter className="pt-0">
                   <Link href={`/dashboard/${p.id}`} className="w-full">
-                    <Button variant="ghost" className="w-full justify-between group-hover:text-indigo-600">
+                    <Button variant="ghost" className="w-full justify-between group-hover:text-[#1e4263]">
                       View Details
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>

@@ -103,7 +103,7 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-4 md:p-8 flex items-center justify-center">
+    <div className="min-h-screen bg-[#f6f8fa]/50 p-4 md:p-8 flex items-center justify-center">
       <Card className="w-full max-w-3xl shadow-lg border-0 ring-1 ring-black/5">
         <CardHeader className="text-center pb-8 border-b bg-white/50 rounded-t-xl">
           <CardTitle className="text-2xl font-bold">Upload Prescription</CardTitle>
@@ -115,7 +115,7 @@ export default function UploadPage() {
           
           {/* Status Stepper */}
           <div className="flex items-center justify-center gap-4 text-sm font-medium">
-            <div className={`flex items-center gap-2 ${isSuccess ? "text-green-600" : isPending ? "text-indigo-600" : "text-gray-900"}`}>
+            <div className={`flex items-center gap-2 ${isSuccess ? "text-[#14532d]" : isPending ? "text-[#1e4263]" : "text-[#192128]"}`}>
               {isSuccess ? <CheckCircle2 className="h-5 w-5" /> : isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <div className="h-6 w-6 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs">1</div>}
               {isSuccess ? "Uploaded — Ready to Process" : isPending ? "Uploading..." : "Select Files"}
             </div>
@@ -131,7 +131,7 @@ export default function UploadPage() {
           {!isPending && !isSuccess && (
             <>
               <div 
-                className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:bg-gray-50/50 transition-colors cursor-pointer group"
+                className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:bg-[#f6f8fa]/50 transition-colors cursor-pointer group"
                 onClick={() => fileInputRef.current?.click()}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
@@ -140,12 +140,12 @@ export default function UploadPage() {
                 }}
               >
                 <div className="flex flex-col items-center space-y-4">
-                  <div className="p-4 bg-indigo-50 text-indigo-600 rounded-full group-hover:scale-110 transition-transform">
+                  <div className="p-4 bg-[#ecf4fe] text-[#1e4263] rounded-full group-hover:scale-110 transition-transform">
                     <Upload className="h-8 w-8" />
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-gray-900">Click or drag files here</p>
-                    <p className="text-sm text-gray-500 mt-1">Supports JPG, PNG, PDF</p>
+                    <p className="text-lg font-semibold text-[#192128]">Click or drag files here</p>
+                    <p className="text-sm text-[#4a5866] mt-1">Supports JPG, PNG, PDF</p>
                   </div>
                 </div>
                 <input 
@@ -175,7 +175,7 @@ export default function UploadPage() {
 
               {files.length > 0 && (
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900">Selected Pages ({files.length})</h3>
+                  <h3 className="font-semibold text-[#192128]">Selected Pages ({files.length})</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {files.map((file, idx) => (
                       <div key={`${file.name}-${idx}`} className="relative group border rounded-lg overflow-hidden bg-white aspect-[3/4]">

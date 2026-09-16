@@ -31,7 +31,7 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#1e4263]" />
       </div>
     );
   }
@@ -39,14 +39,14 @@ export default function SettingsPage() {
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-2xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">Settings</h1>
-        <p className="text-gray-500 mt-1">Manage your account preferences and application settings.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-[#192128]">Settings</h1>
+        <p className="text-[#4a5866] mt-1">Manage your account preferences and application settings.</p>
       </div>
 
       <Card>
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
-            <Globe className="h-5 w-5 text-indigo-600" />
+            <Globe className="h-5 w-5 text-[#1e4263]" />
             Language Preferences
           </CardTitle>
           <CardDescription>
@@ -68,14 +68,14 @@ export default function SettingsPage() {
                   <SelectItem value="hi">हिन्दी (Hindi)</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-[#4a5866]">
                 Medical terms (like medicine names) will remain in English, but explanations and instructions will be translated.
               </p>
             </div>
           </div>
         </CardContent>
         <CardFooter className="flex justify-between items-center border-t px-6 py-4">
-          <div className="text-sm text-green-600 font-medium h-5">
+          <div className="text-sm text-[#14532d] font-medium h-5">
             {showSaved && "Settings saved successfully!"}
           </div>
           <Button onClick={handleSave} disabled={isPending || language === user?.preferred_language}>
@@ -92,16 +92,16 @@ export default function SettingsPage() {
         <CardContent>
           <div className="space-y-2 text-sm">
             <div className="grid grid-cols-3 border-b py-2">
-              <span className="font-medium text-gray-500">Email</span>
-              <span className="col-span-2 text-gray-900">{user?.email}</span>
+              <span className="font-medium text-[#4a5866]">Email</span>
+              <span className="col-span-2 text-[#192128]">{user?.email}</span>
             </div>
             <div className="grid grid-cols-3 border-b py-2">
-              <span className="font-medium text-gray-500">Name</span>
-              <span className="col-span-2 text-gray-900">{user?.full_name || 'Not set'}</span>
+              <span className="font-medium text-[#4a5866]">Name</span>
+              <span className="col-span-2 text-[#192128]">{user?.full_name || 'Not set'}</span>
             </div>
             <div className="grid grid-cols-3 py-2">
-              <span className="font-medium text-gray-500">Member Since</span>
-              <span className="col-span-2 text-gray-900">
+              <span className="font-medium text-[#4a5866]">Member Since</span>
+              <span className="col-span-2 text-[#192128]">
                 {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'Unknown'}
               </span>
             </div>
