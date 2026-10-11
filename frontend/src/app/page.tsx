@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { 
   Pill, ArrowRight, HelpCircle, AlertTriangle, FileText, PlayCircle, 

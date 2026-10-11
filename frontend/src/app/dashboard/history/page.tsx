@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, FileText, Loader2, ArrowRight, Activity, Trash2 } from "lucide-react";
+import { Plus, FileText, Loader2, ArrowRight, Activity, Trash2, ShieldCheck } from "lucide-react";
 import { usePrescriptions, useDeletePrescription } from "@/lib/queries/prescriptions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";

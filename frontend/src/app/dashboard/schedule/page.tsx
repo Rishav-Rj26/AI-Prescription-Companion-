@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format, addDays, subDays, isToday, parseISO } from "date-fns";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, CheckCircle2, XCircle, Bell, AlertTriangle, Loader2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, CheckCircle2, XCircle, Bell, AlertTriangle, Loader2, ShieldCheck, Activity, FileText } from "lucide-react";
 import { useSchedules, useUpdateSchedule } from "@/lib/queries/schedules";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

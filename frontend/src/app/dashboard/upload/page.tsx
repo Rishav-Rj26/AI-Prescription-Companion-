@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, X, ArrowUp, ArrowDown, Camera, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Upload, X, ArrowUp, ArrowDown, Camera, CheckCircle2, AlertCircle, Loader2, FileText, Lock } from "lucide-react";
 import { useUploadPrescription } from "@/lib/queries/prescriptions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
