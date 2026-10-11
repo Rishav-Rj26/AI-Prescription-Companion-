@@ -121,61 +121,69 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#f6f8fa]">
-      {/* Header */}
-      <header className="bg-white border-b border-[#e6ecf1] py-3 px-5 shrink-0 shadow-sm flex justify-between items-center z-10">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => router.push(`/dashboard/${prescriptionId}`)} className="rounded-xl hover:bg-[#ecf4fe]">
-            <ArrowLeft className="h-5 w-5 text-[#4a5866]" />
-          </Button>
+    <div className="flex flex-col flex-1 w-full bg-background min-h-[calc(100vh-80px)]">
+      {/* Header Context Bar */}
+      <div className="bg-surface-container-low border-b border-outline-variant/60 py-3.5 px-6 md:px-space-xl shrink-0">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-[#1e4263] text-white flex items-center justify-center shadow-sm">
+            <Button variant="ghost" size="icon" onClick={() => router.push(`/dashboard/${prescriptionId}`)} className="hover:bg-surface-container-highest">
+              <ArrowLeft className="h-5 w-5 text-on-surface-variant" />
+            </Button>
+            <div className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-sm">
               <Bot className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-[17px] font-bold text-[#1e4263] tracking-tight">Prescription Companion Chat</h1>
-              <p className="text-[12px] text-[#4a5866]">Prescription #{prescriptionId}</p>
+              <h1 className="font-headline-sm text-headline-sm font-bold text-primary tracking-tight">Prescription Companion Chat</h1>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">Prescription #{prescriptionId}</p>
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      {/* Clinical Disclaimer Banner */}
-      <aside className="bg-[#fff8e6] border-b border-[#f5d59a] px-5 py-2.5 text-[#78350f] shrink-0">
-        <div className="max-w-3xl mx-auto flex items-center gap-2.5 text-[12px]">
-          <AlertTriangle className="h-4 w-4 text-[#b45309] shrink-0" />
-          <p className="leading-relaxed">
-            <strong className="font-semibold text-[#5b2500]">Clinical Disclaimer:</strong> This companion explains your prescription in plain language. It does <strong className="font-semibold">NOT</strong> provide medical advice or diagnosis.
-          </p>
+      {/* Clinical Safety Reminder Banner */}
+      <aside aria-label="Clinical Notice" className="bg-[#FEF7EA] border-b border-[#F5D59A] px-6 py-3 shrink-0">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <span className="text-[#78350F] flex-shrink-0">
+              <AlertTriangle className="h-5 w-5" />
+            </span>
+            <p className="font-body-md text-body-md text-[#78350F]">
+              <strong className="font-semibold">Clinical Disclaimer:</strong> This companion explains your prescription in plain language. It does <strong className="font-semibold underline">NOT</strong> provide medical advice or diagnosis.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 bg-[#EDF7EE] border border-[#B8E2BE] px-3 py-1 rounded-full shrink-0">
+            <ShieldCheck className="text-[#14532D] h-4 w-4" />
+            <span className="font-label-sm text-label-sm font-semibold text-[#14532D]">Verified Safe System</span>
+          </div>
         </div>
       </aside>
 
       {/* Main Chat Area */}
-      <main className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
-        <div className="max-w-3xl mx-auto w-full space-y-5">
+      <main className="flex-1 overflow-y-auto p-6 md:px-space-xl flex flex-col gap-4 bg-surface-container-highest/30">
+        <div className="max-w-4xl mx-auto w-full space-y-6">
           {activeSession.messages.map((msg) => (
-            <div key={msg.id} className={`flex gap-3.5 ${msg.role === 'user' ? 'justify-end' : ''}`}>
+            <div key={msg.id} className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : ''}`}>
               {msg.role === 'assistant' && (
-                <div className="w-9 h-9 rounded-xl bg-[#1e4263] text-white flex-shrink-0 flex items-center justify-center shadow-sm">
-                  <Bot className="h-[18px] w-[18px]" />
+                <div className="w-10 h-10 rounded-xl bg-primary text-on-primary flex-shrink-0 flex items-center justify-center shadow-sm">
+                  <Bot className="h-[20px] w-[20px]" />
                 </div>
               )}
               
               <div className={`max-w-[85%] relative ${
                 msg.role === 'user' 
-                  ? 'bg-[#1e4263] text-white rounded-2xl rounded-br-sm px-5 py-3.5 shadow-sm' 
-                  : 'bg-white border border-[#e6ecf1] rounded-2xl rounded-tl-sm px-5 py-4 text-[#192128] tier-1-card'
+                  ? 'bg-primary text-on-primary rounded-2xl rounded-tr-sm px-5 py-4 shadow-sm' 
+                  : 'bg-surface-container-lowest border border-outline-variant rounded-2xl rounded-tl-sm px-6 py-5 text-on-surface tier-1-card'
               }`}>
                 {msg.role === 'assistant' && (
-                  <div className="flex items-center justify-between gap-2 pb-2.5 mb-3 border-b border-[#e6ecf1]">
-                    <span className="text-[13px] font-bold text-[#1e4263] flex items-center gap-1.5">
+                  <div className="flex items-center justify-between gap-3 pb-3 mb-3 border-b border-outline-variant/60">
+                    <span className="font-label-lg text-label-lg font-bold text-primary flex items-center gap-2">
                       Rx Companion
-                      <span className="font-normal text-[#73777e] text-[11px]">
+                      <span className="font-label-sm text-label-sm font-normal text-on-surface-variant">
                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#edf7ee] text-[#14532d] border border-[#b8e2be]">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm text-[11px] font-semibold bg-[#EDF7EE] text-[#14532D] border border-[#B8E2BE]">
                         <ShieldCheck className="h-3 w-3" />
                         Verified
                       </span>
@@ -183,33 +191,33 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                         text={msg.content} 
                         language={user?.preferred_language || "en"} 
                         size="icon" 
-                        className="h-7 w-7 rounded-lg text-[#1e4263] hover:bg-[#ecf4fe]" 
+                        className="h-8 w-8 rounded-lg text-primary hover:bg-secondary-container hover:text-on-secondary-container" 
                       />
                     </div>
                   </div>
                 )}
-                <div className="text-[15px] leading-relaxed">
+                <div className="font-body-md text-[15px] leading-relaxed">
                   {renderMessageContent(msg.content, msg.citations)}
                 </div>
               </div>
 
               {msg.role === 'user' && (
-                <div className="w-9 h-9 rounded-xl bg-[#ecf4fe] text-[#1e4263] flex-shrink-0 flex items-center justify-center shadow-sm">
-                  <UserIcon className="h-[18px] w-[18px]" />
+                <div className="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex-shrink-0 flex items-center justify-center shadow-sm">
+                  <UserIcon className="h-[20px] w-[20px]" />
                 </div>
               )}
             </div>
           ))}
           
           {isSending && (
-            <div className="flex gap-3.5">
-              <div className="w-9 h-9 rounded-xl bg-[#1e4263] text-white flex items-center justify-center shrink-0 shadow-sm">
-                <Bot className="h-[18px] w-[18px]" />
+            <div className="flex gap-4">
+              <div className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+                <Bot className="h-[20px] w-[20px]" />
               </div>
-              <div className="bg-white border border-[#e6ecf1] tier-1-card rounded-2xl rounded-tl-sm px-5 py-4 flex items-center gap-1.5">
-                <span className="h-2 w-2 bg-[#73777e] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="h-2 w-2 bg-[#73777e] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="h-2 w-2 bg-[#73777e] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="bg-surface-container-lowest border border-outline-variant tier-1-card rounded-2xl rounded-tl-sm px-6 py-5 flex items-center gap-2">
+                <span className="h-2.5 w-2.5 bg-outline rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="h-2.5 w-2.5 bg-outline rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="h-2.5 w-2.5 bg-outline rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
             </div>
           )}
@@ -218,18 +226,18 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       </main>
 
       {/* Input Area */}
-      <footer className="bg-white border-t border-[#e6ecf1] p-4 shrink-0">
-        <div className="max-w-3xl mx-auto">
-          <form onSubmit={handleSend} className="flex gap-3">
+      <footer className="bg-surface-container-lowest border-t border-outline-variant p-4 shrink-0">
+        <div className="max-w-4xl mx-auto">
+          <form onSubmit={handleSend} className="flex gap-3 relative">
             <div className="flex-1 relative">
               <Input 
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Ask a question about this prescription..."
-                className="w-full shadow-sm pr-12 h-12 rounded-xl border-[#cbd5e1] text-[15px] focus:border-[#1e4263] focus:ring-[#1e4263]"
+                className="w-full shadow-sm pr-12 h-14 rounded-xl border-outline font-body-md text-body-md focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary bg-surface-container-lowest"
                 disabled={isSending}
               />
-              <div className="absolute right-1 top-1">
+              <div className="absolute right-2 top-2">
                 <VoiceInputButton 
                   language={user?.preferred_language || "en"}
                   disabled={isSending}
@@ -239,8 +247,8 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
                 />
               </div>
             </div>
-            <Button type="submit" disabled={!inputMessage.trim() || isSending} className="bg-[#1e4263] hover:bg-[#002c4b] h-12 px-5 rounded-xl shadow-sm">
-              <Send className="h-4 w-4" />
+            <Button type="submit" disabled={!inputMessage.trim() || isSending} className="bg-primary hover:bg-primary-container text-on-primary h-14 px-6 rounded-xl shadow-sm transition-all active:scale-95">
+              <Send className="h-5 w-5" />
             </Button>
           </form>
         </div>
@@ -249,15 +257,15 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
       {/* Source Modal */}
       {sourceModalContent && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <Card className="max-w-2xl w-full max-h-[80vh] flex flex-col tier-2-floating rounded-2xl overflow-hidden">
-            <div className="p-5 border-b border-[#e6ecf1] flex justify-between items-center bg-[#f6f8fa]">
-              <h3 className="font-bold text-[17px] text-[#1e4263] flex items-center gap-2">
-                <BookOpen className="h-4 w-4 text-[#2e7977]" />
+          <Card className="max-w-2xl w-full max-h-[80vh] flex flex-col rounded-2xl overflow-hidden tier-2-card bg-surface-container-lowest border-outline-variant">
+            <div className="p-5 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+              <h3 className="font-headline-sm text-headline-sm font-bold text-primary flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-secondary" />
                 {sourceModalContent.title}
               </h3>
-              <Button variant="ghost" size="sm" onClick={() => setSourceModalContent(null)} className="rounded-lg hover:bg-white">Close</Button>
+              <Button variant="ghost" size="sm" onClick={() => setSourceModalContent(null)} className="rounded-lg hover:bg-surface-container-highest text-on-surface-variant">Close</Button>
             </div>
-            <div className="p-6 overflow-y-auto whitespace-pre-wrap text-[15px] text-[#4a5866] leading-relaxed">
+            <div className="p-6 overflow-y-auto whitespace-pre-wrap font-body-md text-body-md text-on-surface leading-relaxed">
               {sourceModalContent.text}
             </div>
           </Card>

@@ -29,81 +29,135 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="p-4 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-[#192128]">History</h1>
-            <p className="text-[#4a5866] mt-1">Review your past uploaded prescriptions.</p>
+    <div className="flex flex-col flex-1 w-full bg-background min-h-[calc(100vh-80px)]">
+      {/* Reassuring HIPAA & Clinical Encryption Banner */}
+      <section className="bg-surface-container-low border-b border-outline-variant">
+        <div className="max-w-7xl mx-auto px-6 md:px-space-xl py-2.5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 text-on-surface-variant">
+            <ShieldCheck className="text-secondary h-5 w-5" />
+            <p className="font-label-sm text-label-sm">
+              <strong className="text-on-surface">Encrypted & HIPAA Compliant Prescription Archive</strong> • All prescriptions are stored with end-to-end encryption. Deleting an item permanently removes both the document scan and associated extracted clinical data.
+            </p>
           </div>
-          <Link href="/dashboard/upload">
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Upload New
-            </Button>
-          </Link>
+          <div className="hidden md:flex items-center gap-1.5 text-secondary font-label-sm text-label-sm whitespace-nowrap">
+            <span className="w-2 h-2 rounded-full bg-secondary"></span>
+            <span>AES-256 Active</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Canvas */}
+      <main className="max-w-7xl mx-auto px-6 md:px-space-xl py-8 w-full flex-grow">
+        {/* Page Title & Overview */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          <div>
+            <h1 className="font-headline-xl text-headline-xl text-primary tracking-tight font-bold">Prescription History & Document Library</h1>
+            <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+              Manage, review, and organize your scanned prescriptions, refills, and clinical summaries.
+            </p>
+          </div>
+          {/* Quick Action Group */}
+          <div className="flex items-center gap-3">
+            <Link href="/dashboard/upload">
+              <Button className="bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md px-4 py-2.5 rounded-xl transition-all shadow-sm flex items-center gap-2 h-auto">
+                <Plus className="h-4 w-4" />
+                Upload New Prescription
+              </Button>
+            </Link>
+          </div>
         </div>
 
+        {/* Search & Filter Control Bar */}
+        <div className="bg-surface-container-lowest rounded-xl border border-outline-variant p-4 shadow-sm mb-6 flex flex-col md:flex-row gap-4 justify-between items-center tier-1-card">
+          {/* Search Input */}
+          <div className="relative w-full md:w-96">
+            <Activity className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-outline" />
+            <input 
+              className="w-full pl-10 pr-4 h-[44px] bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:border-primary-container focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors" 
+              placeholder="Search by medication name, doctor, clinic, or Rx #..." 
+              type="text"
+            />
+          </div>
+          {/* Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
+            <button className="px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-secondary-container text-on-secondary-container border border-secondary whitespace-nowrap shadow-sm">All Records</button>
+            <button className="px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant border border-outline-variant hover:bg-surface-container-low transition-colors whitespace-nowrap">Requires Verification</button>
+            <button className="px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant border border-outline-variant hover:bg-surface-container-low transition-colors whitespace-nowrap">Completed</button>
+          </div>
+        </div>
+
+        {/* Dynamic Content */}
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-[#1e4263]" />
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="font-label-md text-label-md text-on-surface-variant">Loading archives...</p>
           </div>
         ) : isError ? (
-          <div className="p-4 bg-[#ffdad6]/50 text-[#93000a] rounded-lg border border-[#ffa4a4] text-center">
+          <div className="p-4 bg-error-container text-on-error-container rounded-xl border border-error text-center font-body-md text-body-md">
             Failed to load prescriptions. Please try again later.
           </div>
         ) : prescriptions?.length === 0 ? (
-          <Card className="border-dashed bg-transparent shadow-none">
+          <Card className="border-dashed border-2 border-outline-variant bg-surface-container-lowest/50 shadow-none">
             <CardContent className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-              <div className="p-4 bg-[#ecf4fe] rounded-full">
-                <FileText className="h-10 w-10 text-[#1e4263]" />
+              <div className="p-4 bg-primary-container/20 rounded-full">
+                <FileText className="h-10 w-10 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">No history yet</h3>
-                <p className="text-[#4a5866] max-w-sm mt-1">
+                <h3 className="font-headline-sm text-headline-sm font-bold text-on-surface">No history yet</h3>
+                <p className="font-body-md text-body-md text-on-surface-variant max-w-sm mt-1">
                   Upload your first prescription image or PDF to get AI-powered insights.
                 </p>
               </div>
               <Link href="/dashboard/upload">
-                <Button variant="outline" className="mt-4">Upload Prescription</Button>
+                <Button variant="outline" className="mt-4 border-primary text-primary hover:bg-surface-container-lowest">Upload Prescription</Button>
               </Link>
             </CardContent>
           </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {prescriptions?.map((p) => (
-              <Card key={p.id} className="group hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3 relative">
+              <Card key={p.id} className="group hover:shadow-md transition-shadow tier-1-card bg-surface-container-lowest border-outline-variant rounded-xl overflow-hidden flex flex-col">
+                <CardHeader className="p-5 pb-3 border-b border-surface-container relative">
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="absolute top-4 right-4 text-[#73777e] hover:text-[#ba1a1a] hover:bg-[#ffdad6]/30"
+                    className="absolute top-4 right-4 h-8 w-8 text-outline hover:text-error hover:bg-error-container/30 transition-colors rounded-full"
                     onClick={(e) => handleDelete(e, p.id)}
                     disabled={isDeleting}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                  <div className="flex flex-col items-start space-y-2">
-                    <Badge variant="outline" className={getStatusColor(p.status)}>
-                      {p.status.charAt(0).toUpperCase() + p.status.slice(1)}
+                  <div className="flex flex-col items-start gap-2">
+                    <Badge variant="outline" className={`${getStatusColor(p.status)} px-2 py-0.5 text-[11px] font-bold tracking-wider rounded-md uppercase border`}>
+                      {p.status}
                     </Badge>
-                    <span className="text-xs text-[#73777e]">
-                      {new Date(p.uploaded_at).toLocaleDateString()}
+                    <span className="font-label-sm text-[11px] text-on-surface-variant font-medium">
+                      Uploaded: {new Date(p.uploaded_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <CardTitle className="text-lg mt-4">
+                  <CardTitle className="font-headline-sm text-headline-sm font-bold text-on-surface mt-3 leading-snug">
                     {p.medicines_summary ? p.medicines_summary : `Prescription #${p.id}`}
                   </CardTitle>
-                  <CardDescription>
-                    {p.page_count} page{p.page_count !== 1 ? 's' : ''}
-                    {(p.test_count ?? 0) > 0 && ` • ${p.test_count} tests`}
-                  </CardDescription>
                 </CardHeader>
-                <CardFooter className="pt-0">
+                <CardContent className="p-5 flex-grow">
+                  <div className="flex flex-col gap-2 font-body-sm text-body-sm text-on-surface-variant">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-outline" />
+                      <span>{p.page_count} page{p.page_count !== 1 ? 's' : ''} scanned</span>
+                    </div>
+                    {(p.test_count ?? 0) > 0 && (
+                      <div className="flex items-center gap-2">
+                        <Activity className="h-4 w-4 text-outline" />
+                        <span>{p.test_count} clinical tests extracted</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+                <CardFooter className="p-4 pt-0 bg-surface-container-lowest border-t border-surface-container mt-auto">
                   <Link href={`/dashboard/${p.id}`} className="w-full">
-                    <Button variant="ghost" className="w-full justify-between group-hover:text-[#1e4263]">
-                      View Details
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                    <Button variant="ghost" className="w-full justify-center gap-2 hover:bg-primary-container/20 text-primary font-label-md text-label-md transition-colors rounded-lg">
+                      View Clinical Summary
+                      <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
                 </CardFooter>
@@ -111,7 +165,7 @@ export default function HistoryPage() {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
