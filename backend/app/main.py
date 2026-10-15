@@ -1,17 +1,35 @@
-from fastapi import FastAPI
+import logging
+import time
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from .api import auth, health
+from .config import settings
 
 app = FastAPI(title="AI Prescription Companion API")
+logger = logging.getLogger(__name__)
 
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, restrict this
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type"],
 )
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Add baseline browser protections without logging sensitive request data."""
+    started = time.perf_counter()
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Cache-Control"] = "no-store"
+    logger.info("%s %s -> %s in %dms", request.method, request.url.path,
+                response.status_code, (time.perf_counter() - started) * 1000)
+    return response
 
 # Include routers
 app.include_router(health.router)

@@ -8,7 +8,7 @@ from app.models.prescription import Prescription
 from app.models.prescription_page import PrescriptionPage
 from app.models.medicine import PrescriptionMedicine
 from app.models.test import Test
-from app.ai.preprocessing import download_image_from_url, preprocess_image
+from app.ai.preprocessing import download_image_from_url, preprocess_image, render_pdf_pages
 from app.ai.extractor import extract_prescription_data
 from app.ai.normalizer import normalize_prescription_medicines
 from app.config import settings
@@ -38,20 +38,11 @@ async def process_prescription_pipeline(prescription_id: int, db: AsyncSession) 
         # 2 & 3. Download and preprocess each page
         image_bytes_list = []
         for page in prescription.pages:
-            # Skip non-images for now, or handle PDF to image conversion if necessary
-            # The current prompt only handles images well. We assume images or we let preprocessing try.
-            # (In a production app, we'd use fitz/PyMuPDF to render PDFs to images first)
-            if page.file_type == "application/pdf":
-                # For Phase 3, we'll try to process it but usually Gemini API needs images.
-                # If it's a PDF, we might need a converter. We will assume the frontend 
-                # handles PDF by generating image previews, but if it uploads raw PDF,
-                # we pass it to download. (Gemini 1.5 Pro supports PDF natively, 
-                # but we're passing it as image_url, which might fail. Let's wrap in try/except)
-                pass 
-                
             raw_bytes = await download_image_from_url(page.file_url)
-            processed_bytes = preprocess_image(raw_bytes)
-            image_bytes_list.append(processed_bytes)
+            if page.file_type == "application/pdf":
+                image_bytes_list.extend(render_pdf_pages(raw_bytes, settings.MAX_PDF_PAGES))
+            else:
+                image_bytes_list.append(preprocess_image(raw_bytes))
             
         if not image_bytes_list:
             raise ValueError("No valid images found for prescription.")

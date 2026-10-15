@@ -1,4 +1,3 @@
-import os
 import uuid
 import boto3
 from fastapi import UploadFile, HTTPException
@@ -13,8 +12,17 @@ s3_client = boto3.client(
     region_name=settings.AWS_S3_REGION,
 )
 
-ALLOWED_TYPES = ["image/jpeg", "image/png", "application/pdf"]
-MAX_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB
+ALLOWED_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "application/pdf": ".pdf"}
+
+def _validate_file_signature(content_type: str, header: bytes) -> None:
+    """Reject content-type spoofing before persisting a patient document."""
+    valid = (
+        (content_type == "image/jpeg" and header.startswith(b"\xff\xd8\xff"))
+        or (content_type == "image/png" and header.startswith(b"\x89PNG\r\n\x1a\n"))
+        or (content_type == "application/pdf" and header.startswith(b"%PDF-"))
+    )
+    if not valid:
+        raise HTTPException(status_code=400, detail="File contents do not match the declared file type.")
 
 async def upload_prescription_page(file: UploadFile, user_id: int, prescription_id: int) -> dict:
     """
@@ -25,16 +33,20 @@ async def upload_prescription_page(file: UploadFile, user_id: int, prescription_
         raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.content_type}. Must be jpeg, png, or pdf.")
     
     # Check file size (by seeking to end, then back)
-    file.file.seek(0, os.SEEK_END)
+    file.file.seek(0, 2)
     file_size = file.file.tell()
     file.file.seek(0)
     
-    if file_size > MAX_SIZE_BYTES:
+    if file_size == 0:
+        raise HTTPException(status_code=400, detail="Empty files cannot be uploaded.")
+    if file_size > settings.MAX_UPLOAD_SIZE_BYTES:
         raise HTTPException(status_code=400, detail=f"File too large. Maximum allowed size is 10MB.")
+    _validate_file_signature(file.content_type, file.file.read(16))
+    file.file.seek(0)
         
     # Generate unique filename for S3
-    ext = file.filename.split(".")[-1] if "." in file.filename else ""
-    s3_key = f"prescriptions/user_{user_id}/presc_{prescription_id}/{uuid.uuid4()}.{ext}"
+    ext = ALLOWED_TYPES[file.content_type]
+    s3_key = f"prescriptions/user_{user_id}/presc_{prescription_id}/{uuid.uuid4()}{ext}"
     
     try:
         # Upload directly from memory/spooled file to S3

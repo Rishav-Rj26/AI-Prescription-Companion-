@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
+from pydantic import ConfigDict, model_validator
 
 class PrescriptionPageResponse(BaseModel):
     id: int
@@ -72,10 +73,25 @@ class PrescriptionListResponse(BaseModel):
         from_attributes = True
 
 class FieldConfirmationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     medicine_id: Optional[int] = None
     test_id: Optional[int] = None
-    field_name: str
+    field_name: Literal["extracted_name", "strength", "dosage", "frequency", "duration", "instructions", "test_name", "description"]
     confirmed_value: str
+
+    @model_validator(mode="after")
+    def validate_target_and_field(self):
+        if (self.medicine_id is None) == (self.test_id is None):
+            raise ValueError("Provide exactly one of medicine_id or test_id")
+        medicine_fields = {"extracted_name", "strength", "dosage", "frequency", "duration", "instructions"}
+        test_fields = {"test_name", "description"}
+        if self.medicine_id is not None and self.field_name not in medicine_fields:
+            raise ValueError("That field cannot be updated on a medicine")
+        if self.test_id is not None and self.field_name not in test_fields:
+            raise ValueError("That field cannot be updated on a test")
+        if not self.confirmed_value.strip():
+            raise ValueError("confirmed_value cannot be blank")
+        return self
 
 class VerifyRequest(BaseModel):
     confirmations: List[FieldConfirmationRequest]
