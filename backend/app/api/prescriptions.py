@@ -17,6 +17,7 @@ from app.models.medicine import PrescriptionMedicine
 from app.models.test import Test
 from app.models.verification_log import VerificationLog
 from app.services.schedule_service import generate_schedules_for_medicine
+from app.services.audit import record_audit_event
 
 router = APIRouter()
 
@@ -59,6 +60,14 @@ async def upload_prescription(
                 delete_prescription_page(public_id, resource_type)
             raise
             
+    await record_audit_event(
+        db,
+        event_name="prescription.uploaded",
+        actor_user_id=current_user.id,
+        resource_type="prescription",
+        resource_id=prescription.id,
+        metadata={"page_count": len(pages)},
+    )
     await db.commit()
     await db.refresh(prescription)
     
@@ -164,6 +173,7 @@ async def delete_prescription(
         raise HTTPException(status_code=404, detail="Prescription not found")
         
     prescription.deleted_at = func.now()
+    await record_audit_event(db, event_name="prescription.deleted", actor_user_id=current_user.id, resource_type="prescription", resource_id=prescription.id)
     await db.commit()
 
 @router.post("/{id}/process", response_model=PrescriptionResponse)
@@ -190,6 +200,7 @@ async def process_prescription(
     # 2. Update status to processing
     prescription.status = "processing"
     prescription.failure_reason = None
+    await record_audit_event(db, event_name="prescription.processing_started", actor_user_id=current_user.id, resource_type="prescription", resource_id=prescription.id)
     await db.commit()
     
     # 3. Run pipeline
@@ -282,6 +293,14 @@ async def verify_prescription_fields(
                 )
                 db.add(log)
                 
+    await record_audit_event(
+        db,
+        event_name="prescription.fields_verified",
+        actor_user_id=current_user.id,
+        resource_type="prescription",
+        resource_id=prescription.id,
+        metadata={"confirmation_count": len(request.confirmations)},
+    )
     await db.commit()
     
     # Generate schedules for newly verified medicines

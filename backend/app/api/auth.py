@@ -1,18 +1,49 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+import secrets
+
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from typing import Any
 
 from app.db.database import get_db
 from app.models.user import User
-from app.schemas.auth import UserCreate, UserLogin, Token, UserResponse, UserSettingsUpdate
+from app.schemas.auth import UserCreate, UserLogin, SessionResponse, UserResponse, UserSettingsUpdate
 from app.services.auth import get_password_hash, verify_password, create_access_token
 from app.api.deps import get_current_user
+from app.config import settings
+from app.services.audit import record_audit_event
 
 router = APIRouter()
 
-@router.post("/register", response_model=Token, status_code=status.HTTP_201_CREATED)
-async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)) -> Any:
+
+def establish_session(response: Response, access_token: str) -> None:
+    """Set an HttpOnly session cookie and a separate double-submit CSRF token."""
+    lifetime_seconds = settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    cookie_options = {
+        "max_age": lifetime_seconds,
+        "secure": settings.COOKIE_SECURE,
+        "samesite": settings.COOKIE_SAMESITE,
+        "path": "/",
+    }
+    response.set_cookie(
+        key=settings.SESSION_COOKIE_NAME,
+        value=access_token,
+        httponly=True,
+        **cookie_options,
+    )
+    response.set_cookie(
+        key=settings.CSRF_COOKIE_NAME,
+        value=secrets.token_urlsafe(32),
+        httponly=False,
+        **cookie_options,
+    )
+
+@router.post("/register", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
+async def register(
+    user_in: UserCreate,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> Any:
     # Check if user exists
     result = await db.execute(select(User).where(User.email == user_in.email))
     user = result.scalars().first()
@@ -31,13 +62,22 @@ async def register(user_in: UserCreate, db: AsyncSession = Depends(get_db)) -> A
     db.add(user)
     await db.commit()
     await db.refresh(user)
+    await record_audit_event(db, event_name="account.registered", actor_user_id=user.id, resource_type="user", resource_id=user.id)
+    await db.commit()
     
     # Generate token
     access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    await record_audit_event(db, event_name="session.signed_in", actor_user_id=user.id, resource_type="user", resource_id=user.id)
+    await db.commit()
+    establish_session(response, access_token)
+    return {"message": "Account created"}
 
-@router.post("/login", response_model=Token)
-async def login(user_in: UserLogin, db: AsyncSession = Depends(get_db)) -> Any:
+@router.post("/login", response_model=SessionResponse)
+async def login(
+    user_in: UserLogin,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+) -> Any:
     # Find user
     result = await db.execute(select(User).where(User.email == user_in.email))
     user = result.scalars().first()
@@ -51,7 +91,22 @@ async def login(user_in: UserLogin, db: AsyncSession = Depends(get_db)) -> Any:
     
     # Generate token
     access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    establish_session(response, access_token)
+    return {"message": "Signed in"}
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+async def logout(
+    response: Response,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> Response:
+    await record_audit_event(db, event_name="session.signed_out", actor_user_id=current_user.id, resource_type="user", resource_id=current_user.id)
+    await db.commit()
+    response.delete_cookie(key=settings.SESSION_COOKIE_NAME, path="/")
+    response.delete_cookie(key=settings.CSRF_COOKIE_NAME, path="/")
+    response.status_code = status.HTTP_204_NO_CONTENT
+    return response
 
 @router.get("/me", response_model=UserResponse)
 async def get_me(current_user: User = Depends(get_current_user)) -> Any:
@@ -64,6 +119,7 @@ async def update_settings(
     db: AsyncSession = Depends(get_db)
 ) -> Any:
     current_user.preferred_language = settings_in.preferred_language
+    await record_audit_event(db, event_name="account.settings_updated", actor_user_id=current_user.id, resource_type="user", resource_id=current_user.id, metadata={"field": "preferred_language"})
     await db.commit()
     await db.refresh(current_user)
     return current_user

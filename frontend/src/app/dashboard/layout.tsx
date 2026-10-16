@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import { CircleHelp, Clock3, FileText, LayoutDashboard, LogOut, Menu, Pill, Plus, Scale, Settings, ShieldCheck, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCurrentUser } from "@/lib/queries/user";
 import { Button } from "@/components/ui/button";
+import api from "@/lib/api";
 
 const navigation = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -31,34 +32,39 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const queryClient = useQueryClient();
   const [menuOpen, setMenuOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const hasToken = useSyncExternalStore(
-    (onStoreChange) => {
-      window.addEventListener("storage", onStoreChange);
-      window.addEventListener("authentication-expired", onStoreChange);
-      return () => {
-        window.removeEventListener("storage", onStoreChange);
-        window.removeEventListener("authentication-expired", onStoreChange);
-      };
-    },
-    () => Boolean(localStorage.getItem("token")),
-    () => false,
-  );
-  const { data: user, isLoading } = useCurrentUser(hasToken);
+  const [sessionState, setSessionState] = useState<"checking" | "authenticated" | "anonymous">("checking");
+  const { data: user, isLoading } = useCurrentUser(sessionState === "authenticated");
 
   useEffect(() => {
-    if (!hasToken) router.replace("/login");
-  }, [hasToken, router]);
+    let active = true;
+    api.get("/auth/me")
+      .then(() => active && setSessionState("authenticated"))
+      .catch(() => active && setSessionState("anonymous"));
+    const sessionExpired = () => setSessionState("anonymous");
+    window.addEventListener("authentication-expired", sessionExpired);
+    return () => {
+      active = false;
+      window.removeEventListener("authentication-expired", sessionExpired);
+    };
+  }, []);
 
-  const signOut = () => {
-    localStorage.removeItem("token");
+  useEffect(() => {
+    if (sessionState === "anonymous") router.replace("/login");
+  }, [router, sessionState]);
+
+  const signOut = async () => {
+    try {
+      await api.post("/auth/logout");
+    } finally {
+      setSessionState("anonymous");
+    }
     queryClient.clear();
-    router.replace("/login");
   };
 
   const navLinkClass = (active: boolean) =>
     `inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${active ? "bg-primary-container text-white" : "text-on-surface-variant hover:bg-surface-container-low hover:text-primary"}`;
 
-  if (!hasToken) {
+  if (sessionState !== "authenticated") {
     return <div className="grid min-h-screen place-items-center bg-background text-sm text-on-surface-variant" role="status">Checking your session…</div>;
   }
 

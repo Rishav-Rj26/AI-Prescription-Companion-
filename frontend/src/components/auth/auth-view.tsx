@@ -102,13 +102,12 @@ export function AuthView({ initialMode }: AuthViewProps) {
 
       setLoading(true);
       try {
-        const response = await api.post("/auth/register", {
+        await api.post("/auth/register", {
           full_name: fullName.trim(),
           email: email.trim(),
           password,
         });
 
-        localStorage.setItem("token", response.data.access_token);
         sessionStorage.removeItem("signup_email");
         router.push("/dashboard");
       } catch (err: unknown) {
@@ -131,12 +130,11 @@ export function AuthView({ initialMode }: AuthViewProps) {
 
       setLoading(true);
       try {
-        const response = await api.post("/auth/login", {
+        await api.post("/auth/login", {
           email: email.trim(),
           password,
         });
 
-        localStorage.setItem("token", response.data.access_token);
         router.push("/dashboard");
       } catch (err: unknown) {
         const detail = isAxiosError<{ detail?: string }>(err) ? err.response?.data?.detail : undefined;

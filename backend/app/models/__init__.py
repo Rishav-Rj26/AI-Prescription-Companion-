@@ -8,3 +8,4 @@ from app.models.knowledge import KnowledgeDocument, DocumentChunk
 from app.models.chat import ChatSession, ChatMessage
 from app.models.schedule import MedicationSchedule
 from app.models.evaluation_run import EvaluationRun
+from app.models.audit_event import AuditEvent

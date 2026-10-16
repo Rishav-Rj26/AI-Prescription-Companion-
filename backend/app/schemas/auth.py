@@ -25,9 +25,8 @@ class UserResponse(BaseModel):
 class UserSettingsUpdate(BaseModel):
     preferred_language: str = Field(pattern="^(en|hi)$")
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
+class SessionResponse(BaseModel):
+    message: str
 
 class TokenData(BaseModel):
     email: Optional[str] = None
