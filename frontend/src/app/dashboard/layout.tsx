@@ -1,94 +1,99 @@
-import Link from 'next/link';
-import { Pill, Plus, HelpCircle, ShieldCheck } from 'lucide-react';
+"use client";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { CircleHelp, Clock3, FileText, LayoutDashboard, LogOut, Menu, Pill, Plus, Scale, Settings, ShieldCheck, X } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCurrentUser } from "@/lib/queries/user";
+import { Button } from "@/components/ui/button";
+
+const navigation = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
+  { href: "/dashboard/history", label: "Prescriptions", icon: FileText },
+  { href: "/dashboard/schedule", label: "Schedule", icon: Clock3 },
+  { href: "/dashboard/compare", label: "Compare", icon: Scale },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+];
+
+function isActive(pathname: string, href: string, exact?: boolean) {
+  return exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function initials(name?: string | null, email?: string) {
+  const source = name?.trim() || email?.split("@")[0] || "Account";
+  return source.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+}
+
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const hasToken = useSyncExternalStore(
+    (onStoreChange) => {
+      window.addEventListener("storage", onStoreChange);
+      window.addEventListener("authentication-expired", onStoreChange);
+      return () => {
+        window.removeEventListener("storage", onStoreChange);
+        window.removeEventListener("authentication-expired", onStoreChange);
+      };
+    },
+    () => Boolean(localStorage.getItem("token")),
+    () => false,
+  );
+  const { data: user, isLoading } = useCurrentUser(hasToken);
+
+  useEffect(() => {
+    if (!hasToken) router.replace("/login");
+  }, [hasToken, router]);
+
+  const signOut = () => {
+    localStorage.removeItem("token");
+    queryClient.clear();
+    router.replace("/login");
+  };
+
+  const navLinkClass = (active: boolean) =>
+    `inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${active ? "bg-primary-container text-white" : "text-on-surface-variant hover:bg-surface-container-low hover:text-primary"}`;
+
+  if (!hasToken) {
+    return <div className="grid min-h-screen place-items-center bg-background text-sm text-on-surface-variant" role="status">Checking your session…</div>;
+  }
+
   return (
-    <div className="bg-background text-on-surface antialiased min-h-screen flex flex-col justify-between selection:bg-surface-container selection:text-primary">
-      {/* Top Navigation Shell */}
-      <header className="bg-surface-container-lowest border-b border-outline-variant shadow-sm sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 md:px-space-xl flex justify-between items-center h-20 w-full">
-          {/* Brand Logo & Nav */}
-          <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="font-headline-sm text-headline-sm text-primary font-bold flex items-center gap-2 tracking-tight">
-              <span className="w-10 h-10 rounded-xl bg-primary-container text-on-primary flex items-center justify-center shadow-sm">
-                <Pill className="h-6 w-6" />
-              </span>
-              <span className="hidden md:inline">AI Prescription Companion</span>
+    <div className="min-h-screen bg-background text-on-surface antialiased selection:bg-primary-fixed selection:text-primary">
+      <header className="sticky top-0 z-40 border-b border-outline-variant bg-surface-container-lowest/95 backdrop-blur">
+        <div className="mx-auto flex h-18 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 md:px-space-xl">
+          <div className="flex min-w-0 items-center gap-3 lg:gap-7">
+            <Link href="/dashboard" className="flex shrink-0 items-center gap-2 rounded-xl text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+              <span className="flex size-10 items-center justify-center rounded-xl bg-primary-container text-white shadow-sm"><Pill className="size-5" aria-hidden="true" /></span>
+              <span className="hidden font-headline-sm text-headline-sm font-bold tracking-tight sm:inline">Prescription Companion</span>
             </Link>
-            
-            {/* Desktop Navigation Items */}
-            <nav className="hidden lg:flex items-center gap-6 pt-1">
-              <Link href="/dashboard/history" className="text-on-surface-variant hover:text-primary transition-colors font-label-lg text-label-lg">Prescriptions</Link>
-              <Link href="/dashboard/schedule" className="text-on-surface-variant hover:text-primary transition-colors font-label-lg text-label-lg">Schedule</Link>
-              <Link href="/dashboard/compare" className="text-on-surface-variant hover:text-primary transition-colors font-label-lg text-label-lg">Compare</Link>
-              <Link href="/dashboard/settings" className="text-on-surface-variant hover:text-primary transition-colors font-label-lg text-label-lg">Settings</Link>
+            <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+              {navigation.map((item) => {
+                const active = isActive(pathname, item.href, item.exact);
+                return <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} aria-current={active ? "page" : undefined} className={navLinkClass(active)}>{item.label}</Link>;
+              })}
             </nav>
           </div>
-          
-          {/* Trailing Action & User Profile */}
-          <div className="flex items-center gap-4">
-            {/* Upload CTA */}
-            <Link href="/dashboard/upload" className="hidden sm:inline-flex bg-primary-container text-on-primary font-label-md text-label-md px-4 py-2 rounded-xl hover:brightness-110 active:scale-95 transition-all items-center gap-2 shadow-sm">
-              <Plus className="h-4 w-4" />
-              <span>Upload New</span>
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <Link href="/dashboard/upload" className="hidden sm:inline-flex"><Button className="h-10 gap-2 rounded-xl bg-primary text-on-primary hover:bg-primary-container"><Plus className="size-4" aria-hidden="true" />Upload</Button></Link>
+            <button type="button" onClick={() => setHelpOpen((open) => !open)} aria-expanded={helpOpen} aria-controls="care-guidance" className="rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" title="Medication safety guidance"><CircleHelp className="size-5" aria-hidden="true" /><span className="sr-only">Medication safety guidance</span></button>
+            <Link href="/dashboard/settings" aria-label="Open account settings" className="hidden items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-surface-container-low sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">
+              <span className="flex size-9 items-center justify-center rounded-full bg-secondary text-on-secondary text-sm font-bold">{isLoading ? "…" : initials(user?.full_name, user?.email)}</span>
+              <span className="hidden max-w-36 text-left md:flex md:flex-col"><span className="truncate text-sm font-bold text-on-surface">{isLoading ? "Loading account" : user?.full_name || "Your account"}</span><span className="text-xs text-on-surface-variant">Settings</span></span>
             </Link>
-            
-            {/* Help Action */}
-            <button className="p-2 text-on-surface-variant hover:text-primary rounded-lg transition-colors" title="Clinical Help Desk">
-              <HelpCircle className="h-5 w-5" />
-            </button>
-            
-            {/* Divider */}
-            <div className="h-6 w-px bg-outline-variant hidden sm:block"></div>
-            
-            {/* User Profile Pill */}
-            <div className="flex items-center gap-3 pl-1 cursor-pointer hover:bg-surface-container-low p-1.5 rounded-xl transition-colors">
-              <div className="w-9 h-9 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-label-md text-label-md shadow-sm">
-                AP
-              </div>
-              <div className="hidden sm:flex flex-col text-left">
-                <span className="font-label-sm text-label-sm text-on-surface leading-tight font-bold">Arthur P.</span>
-                <span className="font-label-sm text-[11px] text-secondary leading-tight">Patient Account</span>
-              </div>
-            </div>
+            <button type="button" onClick={signOut} className="hidden rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-error-container hover:text-on-error-container md:inline-flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error" title="Sign out"><LogOut className="size-5" aria-hidden="true" /><span className="sr-only">Sign out</span></button>
+            <button type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-controls="mobile-navigation" className="rounded-xl p-2 text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-primary lg:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary">{menuOpen ? <X className="size-6" aria-hidden="true" /> : <Menu className="size-6" aria-hidden="true" />}<span className="sr-only">{menuOpen ? "Close navigation" : "Open navigation"}</span></button>
           </div>
         </div>
+        {menuOpen && <nav id="mobile-navigation" className="border-t border-outline-variant bg-surface-container-lowest px-4 py-3 lg:hidden" aria-label="Mobile navigation"><div className="mx-auto grid max-w-7xl gap-1">{navigation.map((item) => { const active = isActive(pathname, item.href, item.exact); const Icon = item.icon; return <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} aria-current={active ? "page" : undefined} className={navLinkClass(active)}><Icon className="size-4" aria-hidden="true" />{item.label}</Link>; })}<Link href="/dashboard/upload" onClick={() => setMenuOpen(false)} className={navLinkClass(false)}><Plus className="size-4" aria-hidden="true" />Upload prescription</Link><button type="button" onClick={signOut} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-error transition-colors hover:bg-error-container"><LogOut className="size-4" aria-hidden="true" />Sign out</button></div></nav>}
       </header>
-
-      {/* Reassuring HIPAA & Clinical Encryption Banner */}
-      <section className="bg-surface-container-low border-b border-outline-variant">
-        <div className="max-w-7xl mx-auto px-6 md:px-space-xl py-2.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 text-on-surface-variant">
-            <ShieldCheck className="h-5 w-5 text-secondary" />
-            <p className="font-label-sm text-[12px] leading-snug">
-              <strong className="text-on-surface font-semibold">Encrypted & HIPAA Compliant Protocol Active</strong> • Your health information is stored with end-to-end AES-256 encryption.
-            </p>
-          </div>
-          <div className="hidden md:flex items-center gap-1.5 text-secondary font-label-sm text-[12px] font-bold tracking-wide uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
-            <span>AES-256 Active</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Canvas */}
-      <main className="w-full flex-grow">
-        {children}
-      </main>
-      
-      {/* Simple Footer */}
-      <footer className="border-t border-outline-variant bg-surface-container-lowest mt-12 py-8 text-center text-sm text-on-surface-variant font-label-sm">
-         <p>© 2025 AI Prescription Companion, Inc. All rights reserved.</p>
-         <div className="flex justify-center gap-4 mt-2">
-           <a href="#" className="hover:text-primary">Privacy</a>
-           <a href="#" className="hover:text-primary">Terms</a>
-           <a href="#" className="hover:text-primary">HIPAA Notice</a>
-         </div>
-      </footer>
+      {helpOpen && <aside id="care-guidance" className="border-b border-[#F5D59A] bg-[#FEF7EA] px-4 py-3" aria-label="Medication safety guidance"><div className="mx-auto flex max-w-7xl items-start gap-3 text-sm text-[#78350F]"><ShieldCheck className="mt-0.5 size-5 shrink-0" aria-hidden="true" /><p><strong>Medication safety:</strong> This tool organizes prescription information; it does not diagnose or replace a clinician. For a suspected overdose, severe reaction, or emergency, contact local emergency services. For medication questions, confirm with your pharmacist or prescriber.</p></div></aside>}
+      <main className="w-full">{children}</main>
+      <footer className="mt-12 border-t border-outline-variant bg-surface-container-lowest px-6 py-7 text-center text-sm text-on-surface-variant"><p>AI Prescription Companion helps you review prescription details — always confirm treatment decisions with your care team.</p></footer>
     </div>
   );
 }

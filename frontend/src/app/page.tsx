@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 /* ---------- Material Symbol helper ---------- */
 function MIcon({
@@ -23,6 +25,15 @@ function MIcon({
 }
 
 export default function Home() {
+  const router = useRouter();
+  const [previewEmail, setPreviewEmail] = useState("");
+
+  const beginPreview = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    sessionStorage.setItem("signup_email", previewEmail.trim());
+    router.push("/signup");
+  };
+
   return (
     <div className="bg-background text-on-surface font-body-md text-body-md antialiased min-h-screen flex flex-col selection:bg-surface-container selection:text-primary">
       {/* TOP APP BAR */}
@@ -39,7 +50,7 @@ export default function Home() {
           <nav className="hidden md:flex items-center gap-8 font-label-lg text-label-lg">
             <Link href="#how-it-works" className="text-on-surface-variant hover:text-primary transition-colors duration-150">How It Works</Link>
             <Link href="#clinical-safety" className="text-on-surface-variant hover:text-primary transition-colors duration-150">Clinical Safety</Link>
-            <Link href="#security-hipaa" className="text-on-surface-variant hover:text-primary transition-colors duration-150">Security &amp; HIPAA</Link>
+            <Link href="#privacy-and-safety" className="text-on-surface-variant hover:text-primary transition-colors duration-150">Privacy &amp; Safety</Link>
             <Link href="#advisory-board" className="text-on-surface-variant hover:text-primary transition-colors duration-150">Advisory Board</Link>
           </nav>
           {/* Trailing Buttons */}
@@ -49,9 +60,9 @@ export default function Home() {
               <span>Try Free Preview</span>
               <MIcon icon="arrow_forward" className="text-base" />
             </Link>
-            <button aria-label="Help &amp; Guidance" className="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-lg">
+            <Link href="#clinical-safety" aria-label="Read medication safety guidance" className="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-lg">
               <MIcon icon="help" />
-            </button>
+            </Link>
           </div>
         </div>
       </header>
@@ -84,7 +95,7 @@ export default function Home() {
             <div className="lg:col-span-6 space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container border border-outline-variant/60 font-label-md text-label-md text-primary font-medium">
                 <span className="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                <span>Clinical-Grade OCR &amp; Plain Language Translation</span>
+                <span>AI-assisted extraction &amp; plain-language review</span>
               </div>
               <h1 className="font-headline-xl text-headline-xl text-primary tracking-tight leading-tight">
                 Understand your prescriptions with clarity, precision, and confidence.
@@ -98,16 +109,16 @@ export default function Home() {
                   <MIcon icon="document_scanner" className="text-xl" />
                   <span>Upload Prescription to Test</span>
                 </Link>
-                <button className="inline-flex items-center justify-center font-label-lg text-label-lg border-[1.5px] border-primary-container text-primary-container bg-transparent px-6 py-3.5 rounded-xl hover:bg-surface-container-low active:scale-95 transition-all text-center gap-2 font-semibold">
-                  <MIcon icon="play_circle" className="text-xl" />
-                  <span>Watch 60s Demo</span>
-                </button>
+                <Link href="#how-it-works" className="inline-flex items-center justify-center font-label-lg text-label-lg border-[1.5px] border-primary-container text-primary-container bg-transparent px-6 py-3.5 rounded-xl hover:bg-surface-container-low active:scale-95 transition-all text-center gap-2 font-semibold">
+                  <MIcon icon="visibility" className="text-xl" />
+                  <span>Explore how it works</span>
+                </Link>
               </div>
               {/* Trust Badges */}
               <div className="pt-4 flex flex-wrap items-center gap-y-2 gap-x-6 text-on-surface-variant font-label-md text-label-md border-t border-surface-container-high">
                 <div className="flex items-center gap-1.5">
                   <MIcon icon="verified_user" className="text-secondary text-lg" />
-                  <span>HIPAA BAA Compliant</span>
+                  <span>Review before use</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <MIcon icon="credit_card_off" className="text-secondary text-lg" />
@@ -115,7 +126,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <MIcon icon="lock" className="text-secondary text-lg" />
-                  <span>256-Bit Encrypted</span>
+                  <span>Original label retained</span>
                 </div>
               </div>
             </div>
@@ -257,21 +268,21 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-5 space-y-6">
               <span className="inline-block px-3.5 py-1.5 rounded-full bg-surface-container text-primary font-label-md text-label-md font-bold">Advisory Board &amp; Evidence</span>
-              <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Engineered with Clinical Scaffolding, Not Unchecked Hallucinations</h2>
-              <p className="font-body-lg text-body-lg text-on-surface-variant">Healthcare communication demands absolute reliability. Every output produced by our models is anchored to published drug monographs, FDA package inserts, and standard geriatric pharmacology protocols.</p>
+              <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Designed for careful medication review</h2>
+              <p className="font-body-lg text-body-lg text-on-surface-variant">Prescription handwriting and abbreviations can be difficult to read. The original document remains the source of truth; use the extracted record to prepare questions for your pharmacist or prescriber.</p>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <MIcon icon="verified" className="text-secondary text-xl mt-0.5" />
                   <div>
-                    <strong className="font-headline-sm text-headline-sm text-primary text-base font-bold block">Strict Grounding in DailyMed &amp; FDA Labels</strong>
-                    <span className="font-body-md text-body-md text-on-surface-variant">We restrict generative models to verified authoritative medical indices. Unverifiable statements are flagged immediately.</span>
+                    <strong className="font-headline-sm text-headline-sm text-primary text-base font-bold block">Original prescription stays visible</strong>
+                    <span className="font-body-md text-body-md text-on-surface-variant">Compare the extracted name, strength, and directions with the original document before scheduling or acting on any detail.</span>
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <MIcon icon="health_and_safety" className="text-secondary text-xl mt-0.5" />
                   <div>
-                    <strong className="font-headline-sm text-headline-sm text-primary text-base font-bold block">Elderly &amp; Low-Vision Optimization</strong>
-                    <span className="font-body-md text-body-md text-on-surface-variant">Built to exceed WCAG 2.1 AAA high-contrast criteria with high-legibility typographic scale and 52px minimum tap targets.</span>
+                    <strong className="font-headline-sm text-headline-sm text-primary text-base font-bold block">Readable, caregiver-friendly workflow</strong>
+                    <span className="font-body-md text-body-md text-on-surface-variant">Use the schedule, large text, and audio features to make a medication conversation easier to follow.</span>
                   </div>
                 </li>
               </ul>
@@ -327,20 +338,20 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SECTION: PRIVACY & HIPAA */}
-        <section className="py-16 bg-surface-container-low/50 border-t border-outline-variant/40" id="security-hipaa">
+        {/* SECTION: PRIVACY & SAFETY */}
+        <section className="py-16 bg-surface-container-low/50 border-t border-outline-variant/40" id="privacy-and-safety">
           <div className="max-w-7xl mx-auto px-6 md:px-space-xl">
             <div className="text-center max-w-3xl mx-auto space-y-3 mb-12">
               <span className="inline-block px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md font-bold">Sanctuary of Privacy</span>
-              <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Bank-Grade Privacy &amp; HIPAA Compliant Security</h2>
-              <p className="font-body-lg text-body-lg text-on-surface-variant">Medical information is sacred. We treat every prescription scan with hospital-level defense protocols, explicit BAA agreements, and automated redaction.</p>
+              <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Privacy-minded, safety-first medication review</h2>
+              <p className="font-body-lg text-body-lg text-on-surface-variant">Only upload records you are authorized to manage. Sign out on shared devices and confirm all medication decisions with a qualified clinician.</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { icon: "lock", title: "Zero Data Selling", desc: "Your medical documentation is never sold to insurers, advertisers, or third-party brokers. Ever." },
-                { icon: "security", title: "End-to-End AES-256", desc: "Encrypted in transit via TLS 1.3 and at rest with military-grade AES-256 keys managed via dedicated HSMs." },
-                { icon: "person_remove", title: "Automated PII Stripping", desc: "Personal identifying details like Social Security Numbers and addresses are stripped locally before processing." },
-                { icon: "assignment_turned_in", title: "Certified BAA Signed", desc: "All infrastructure partners hold executed Business Associate Agreements and annual third-party SOC2 Type II audits." },
+                { icon: "lock", title: "Use a unique password", desc: "Protect your account with a strong, unique password and never share your sign-in credentials." },
+                { icon: "security", title: "Sign out on shared devices", desc: "Close your session when you finish reviewing records on a public or shared computer." },
+                { icon: "person_remove", title: "Upload only what is needed", desc: "Share only records you are authorized to manage and avoid adding unrelated personal documents." },
+                { icon: "assignment_turned_in", title: "Confirm before acting", desc: "Use the original prescription and your care team to verify medications, doses, and directions." },
               ].map((card) => (
                 <div key={card.title} className="bg-surface-container-lowest p-6 rounded-2xl tier-1-card space-y-3">
                   <div className="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary">
@@ -354,10 +365,10 @@ export default function Home() {
             {/* Compliance Badges */}
             <div className="mt-12 pt-8 border-t border-outline-variant/30 flex flex-wrap items-center justify-center gap-8 md:gap-14 text-on-surface-variant">
               {[
-                { icon: "shield", label: "HIPAA Compliant Entity" },
-                { icon: "verified_user", label: "SOC2 Type II Certified" },
-                { icon: "health_and_safety", label: "FDA SaMD Guidance Aligned" },
-                { icon: "accessibility_new", label: "WCAG 2.1 AAA Accessibility" },
+                { icon: "shield", label: "Medication details are for review" },
+                { icon: "verified_user", label: "Original label is the source of truth" },
+                { icon: "health_and_safety", label: "Ask a pharmacist or prescriber" },
+                { icon: "accessibility_new", label: "Designed with readable controls" },
               ].map((badge) => (
                 <div key={badge.label} className="flex items-center gap-2 font-label-md text-label-md font-bold">
                   <MIcon icon={badge.icon} className="text-secondary" />
@@ -372,8 +383,8 @@ export default function Home() {
         <section className="py-16 md:py-20 max-w-7xl mx-auto px-6 md:px-space-xl" id="advisory-board">
           <div className="text-center max-w-3xl mx-auto space-y-3 mb-14">
             <span className="inline-block px-3 py-1 rounded-full bg-surface-container text-primary font-label-md text-label-md font-bold">Voices of Care</span>
-            <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Trusted by Caregivers &amp; Clinical Pharmacists</h2>
-            <p className="font-body-lg text-body-lg text-on-surface-variant">Real experiences from families managing multi-drug schedules and medical professionals reviewing our safe translation framework.</p>
+            <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Illustrative review scenarios</h2>
+            <p className="font-body-lg text-body-lg text-on-surface-variant">Examples of the kinds of medication-review conversations this workspace can help families prepare for.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Caregiver Testimonial */}
@@ -389,8 +400,8 @@ export default function Home() {
               <div className="flex items-center gap-4 pt-4 border-t border-surface-container">
                 <div className="w-12 h-12 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-lg">MR</div>
                 <div>
-                  <div className="font-headline-sm text-headline-sm text-primary font-bold text-base">Margaret Roberts</div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant">Primary Family Caregiver • Chicago, IL</div>
+                  <div className="font-headline-sm text-headline-sm text-primary font-bold text-base">Caregiver review scenario</div>
+                  <div className="font-label-sm text-label-sm text-on-surface-variant">Illustrative example</div>
                 </div>
               </div>
             </div>
@@ -407,8 +418,8 @@ export default function Home() {
               <div className="flex items-center gap-4 pt-4 border-t border-surface-container">
                 <div className="w-12 h-12 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold text-lg">DK</div>
                 <div>
-                  <div className="font-headline-sm text-headline-sm text-primary font-bold text-base">Dr. David Koenig, PharmD, BCGP</div>
-                  <div className="font-label-sm text-label-sm text-on-surface-variant">Board Certified Geriatric Pharmacist • Member, Clinical Advisory Council</div>
+                  <div className="font-headline-sm text-headline-sm text-primary font-bold text-base">Pharmacist discussion scenario</div>
+                  <div className="font-label-sm text-label-sm text-on-surface-variant">Illustrative example</div>
                 </div>
               </div>
             </div>
@@ -422,13 +433,13 @@ export default function Home() {
               <div className="max-w-2xl mx-auto text-center space-y-4">
                 <div className="inline-flex items-center gap-2 bg-on-primary-container/20 text-inverse-on-surface px-4 py-1.5 rounded-full font-label-md text-label-md">
                   <MIcon icon="lock_clock" className="text-secondary-fixed text-lg" />
-                  <span>Encrypted Instant Assessment</span>
+                  <span>Start a careful review</span>
                 </div>
                 <h2 className="font-headline-xl text-headline-xl text-white font-bold leading-tight">Start Your Free Prescription Preview</h2>
-                <p className="font-body-lg text-body-lg text-inverse-on-surface/90 leading-relaxed">Enter your email to test our clinical OCR engine with any prescription photo or medication label. No credit card required. Private, secure, and compliant.</p>
+                <p className="font-body-lg text-body-lg text-inverse-on-surface/90 leading-relaxed">Create an account to organize prescription photos or medication labels. Review every extracted detail against the original document.</p>
                 <div className="pt-6">
-                  <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto" onSubmit={(e) => e.preventDefault()}>
-                    <input className="flex-1 h-[52px] px-4 rounded-xl bg-surface-container-lowest text-on-surface border-[1.5px] border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary-fixed outline-none text-body-lg placeholder:text-on-surface-variant/70 shadow-xs" placeholder="Enter your email address..." type="email" required />
+                  <form className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto" onSubmit={beginPreview}>
+                    <input className="flex-1 h-[52px] px-4 rounded-xl bg-surface-container-lowest text-on-surface border-[1.5px] border-outline-variant focus:border-primary focus:ring-2 focus:ring-primary-fixed outline-none text-body-lg placeholder:text-on-surface-variant/70 shadow-xs" placeholder="Enter your email address..." type="email" value={previewEmail} onChange={(event) => setPreviewEmail(event.target.value)} required />
                     <button className="h-[52px] px-6 rounded-xl bg-secondary-fixed text-on-secondary-fixed font-label-lg text-label-lg font-bold hover:brightness-105 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2 shrink-0" type="submit">
                       <span>Start Free Preview</span>
                       <MIcon icon="arrow_forward" className="text-lg" />
@@ -443,7 +454,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <p className="text-xs text-inverse-on-surface/70 pt-2 font-label-sm">By using this free preview, you acknowledge our Clinical Safety Notice and HIPAA Privacy Terms.</p>
+                <p className="text-xs text-inverse-on-surface/70 pt-2 font-label-sm">By creating an account, you acknowledge that this tool does not replace professional medical advice, diagnosis, or treatment.</p>
               </div>
             </div>
           </div>
@@ -463,7 +474,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2 font-label-md text-label-md">
-            {["Privacy Policy", "HIPAA Compliance", "Terms of Service", "Clinical Disclaimer", "Accessibility Statement", "Contact Care Support"].map((link) => (
+            {["Privacy Notice", "Terms of Service", "Clinical Disclaimer", "Accessibility Statement"].map((link) => (
               <Link key={link} href="#" className="text-on-surface-variant hover:text-primary hover:underline transition-colors">{link}</Link>
             ))}
           </div>

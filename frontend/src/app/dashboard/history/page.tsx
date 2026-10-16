@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useMemo, useState } from "react";
 import { Plus, FileText, Loader2, ArrowRight, Activity, Trash2, ShieldCheck } from "lucide-react";
 import { usePrescriptions, useDeletePrescription } from "@/lib/queries/prescriptions";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,17 @@ import { Badge } from "@/components/ui/badge";
 export default function HistoryPage() {
   const { data: prescriptions, isLoading, isError } = usePrescriptions();
   const { mutate: deletePrescription, isPending: isDeleting } = useDeletePrescription();
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<"all" | "in-progress" | "completed">("all");
+
+  const filteredPrescriptions = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    return (prescriptions ?? []).filter((prescription) => {
+      const matchesFilter = filter === "all" || (filter === "completed" ? prescription.status === "completed" : ["uploaded", "processing"].includes(prescription.status));
+      const searchText = `${prescription.id} ${prescription.medicines_summary ?? ""}`.toLowerCase();
+      return matchesFilter && (!normalizedQuery || searchText.includes(normalizedQuery));
+    });
+  }, [filter, prescriptions, query]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -30,18 +42,18 @@ export default function HistoryPage() {
 
   return (
     <div className="flex flex-col flex-1 w-full bg-background min-h-[calc(100vh-80px)]">
-      {/* Reassuring HIPAA & Clinical Encryption Banner */}
+      {/* Record-handling reminder */}
       <section className="bg-surface-container-low border-b border-outline-variant">
         <div className="max-w-7xl mx-auto px-6 md:px-space-xl py-2.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-2.5 text-on-surface-variant">
             <ShieldCheck className="text-secondary h-5 w-5" />
             <p className="font-label-sm text-label-sm">
-              <strong className="text-on-surface">Encrypted & HIPAA Compliant Prescription Archive</strong> • All prescriptions are stored with end-to-end encryption. Deleting an item permanently removes both the document scan and associated extracted clinical data.
+              <strong className="text-on-surface">Review each record against the original prescription.</strong> Deleting a record removes it from your account history.
             </p>
           </div>
           <div className="hidden md:flex items-center gap-1.5 text-secondary font-label-sm text-label-sm whitespace-nowrap">
             <span className="w-2 h-2 rounded-full bg-secondary"></span>
-            <span>AES-256 Active</span>
+            <span>Account library</span>
           </div>
         </div>
       </section>
@@ -74,15 +86,21 @@ export default function HistoryPage() {
             <Activity className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-outline" />
             <input 
               className="w-full pl-10 pr-4 h-[44px] bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:border-primary-container focus:ring-1 focus:ring-primary-container focus:outline-none transition-colors" 
-              placeholder="Search by medication name, doctor, clinic, or Rx #..." 
+              placeholder="Search by medication name or record number..."
               type="text"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
             />
           </div>
           {/* Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
-            <button className="px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-secondary-container text-on-secondary-container border border-secondary whitespace-nowrap shadow-sm">All Records</button>
-            <button className="px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant border border-outline-variant hover:bg-surface-container-low transition-colors whitespace-nowrap">Requires Verification</button>
-            <button className="px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant border border-outline-variant hover:bg-surface-container-low transition-colors whitespace-nowrap">Completed</button>
+            {([
+              ["all", "All records"],
+              ["in-progress", "In progress"],
+              ["completed", "Completed"],
+            ] as const).map(([value, label]) => (
+              <button key={value} type="button" onClick={() => setFilter(value)} aria-pressed={filter === value} className={`px-3.5 py-1.5 rounded-full font-label-md text-label-md border whitespace-nowrap transition-colors ${filter === value ? "bg-secondary-container text-on-secondary-container border-secondary shadow-sm" : "bg-surface-container text-on-surface-variant border-outline-variant hover:bg-surface-container-low"}`}>{label}</button>
+            ))}
           </div>
         </div>
 
@@ -113,9 +131,15 @@ export default function HistoryPage() {
               </Link>
             </CardContent>
           </Card>
+        ) : filteredPrescriptions.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest p-12 text-center">
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">No matching records</h2>
+            <p className="mt-2 font-body-md text-body-md text-on-surface-variant">Try a different medication name, record number, or filter.</p>
+            <Button type="button" variant="outline" className="mt-5" onClick={() => { setQuery(""); setFilter("all"); }}>Clear filters</Button>
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {prescriptions?.map((p) => (
+            {filteredPrescriptions.map((p) => (
               <Card key={p.id} className="group hover:shadow-md transition-shadow tier-1-card bg-surface-container-lowest border-outline-variant rounded-xl overflow-hidden flex flex-col">
                 <CardHeader className="p-5 pb-3 border-b border-surface-container relative">
                   <Button 

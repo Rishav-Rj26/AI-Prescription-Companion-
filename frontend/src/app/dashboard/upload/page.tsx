@@ -280,9 +280,9 @@ export default function UploadPage() {
             <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 flex items-start gap-3 shadow-sm">
               <Lock className="h-5 w-5 text-secondary shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-label-md text-label-md text-on-surface font-bold">Privacy First Processing</h4>
+                <h4 className="font-label-md text-label-md text-on-surface font-bold">Before you upload</h4>
                 <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
-                  Images are processed in memory and immediately discarded if not saved to your history. All data in transit is TLS 1.3 encrypted.
+                  Upload only documents you are authorized to manage. Review the extracted details against the original prescription before using them.
                 </p>
               </div>
             </div>

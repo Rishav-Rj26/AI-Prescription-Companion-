@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "AI Prescription Companion — Clear, Safe Prescription Comprehension",
-  description: "AI-powered prescription reading, transcription, and plain-language translation for patients and caregivers. HIPAA-compliant, clinical-grade OCR.",
+  description: "AI-assisted prescription reading, transcription, and plain-language review for patients and caregivers.",
 };
 
 import { Providers } from "@/components/providers";

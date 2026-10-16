@@ -45,13 +45,13 @@ export default function SettingsPage() {
             <div>
               <h1 className="font-headline-xl text-headline-xl text-primary tracking-tight font-bold">Account Settings & Data Privacy</h1>
               <p className="font-body-md text-body-md text-on-surface-variant mt-1 max-w-3xl">
-                Manage language localization, clinical data retention horizons, cryptographic vault security, and export or erase records.
+                Choose your preferred language and review the information saved to your account.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <Button variant="outline" className="h-12 px-4 rounded-xl border-primary-container text-primary font-label-lg text-label-lg hover:bg-surface-container flex items-center gap-2 transition duration-150 shadow-sm" onClick={() => window.print()}>
                 <span className="material-symbols-outlined text-primary">download</span>
-                <span>Download My Complete PHI Archive</span>
+                <span>Print Account Summary</span>
               </Button>
               <Button 
                 onClick={handleSave} 
@@ -91,12 +91,12 @@ export default function SettingsPage() {
                 </a>
               </nav>
             </div>
-            {/* Clinical Trust Badge */}
+            {/* Privacy guidance */}
             <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant text-primary flex items-start gap-3">
-              <span className="material-symbols-outlined text-secondary mt-0.5">verified_user</span>
+              <span className="material-symbols-outlined text-secondary mt-0.5">privacy_tip</span>
               <div>
-                <p className="font-label-md text-label-md font-bold">Zero-Knowledge Enclave</p>
-                <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Your decrypted health information never trains foundational commercial models.</p>
+                <p className="font-label-md text-label-md font-bold">Keep your account private</p>
+                <p className="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Sign out on shared devices and confirm medication details with the original prescription and your care team.</p>
               </div>
             </div>
           </aside>
@@ -113,7 +113,7 @@ export default function SettingsPage() {
                   <h2 className="font-headline-md text-headline-md font-bold text-primary">Language & Localization</h2>
                 </div>
                 <p className="font-body-md text-body-md text-on-surface-variant mt-2">
-                  Select primary clinical language and bilingual support for complex prescription schedules. Medical terms remain in English.
+                  Select the language used for supported translated guidance. Medical terms may remain in English to preserve label accuracy.
                 </p>
               </div>
               
@@ -136,7 +136,7 @@ export default function SettingsPage() {
                       </span>
                     </div>
                     <p className="font-body-md text-body-md text-on-surface-variant">
-                      Primary clinical monographs, warning labels, and dosage instructions formatted in standardized US Clinical English.
+                      English is used for the interface and supported prescription guidance.
                     </p>
                   </label>
                   
@@ -155,7 +155,7 @@ export default function SettingsPage() {
                       </span>
                     </div>
                     <p className="font-body-md text-body-md text-on-surface-variant">
-                      Interface and prescription instructions are translated to Hindi for improved accessibility. (Medical terms kept in English).
+                      Supported prescription guidance is translated to Hindi. Medical terms may remain in English.
                     </p>
                   </label>
                 </div>

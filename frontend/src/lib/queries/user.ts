@@ -10,13 +10,15 @@ export interface User {
   created_at: string;
 }
 
-export const useCurrentUser = () => {
+export const useCurrentUser = (enabled = true) => {
   return useQuery({
     queryKey: ["currentUser"],
     queryFn: async (): Promise<User> => {
       const { data } = await api.get("/auth/me");
       return data;
     },
+    enabled,
+    retry: false,
   });
 };
 

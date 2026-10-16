@@ -36,7 +36,10 @@ export function AuthView({ initialMode }: AuthViewProps) {
 
   // Form states
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return sessionStorage.getItem("signup_email") ?? "";
+  });
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -58,7 +61,7 @@ export function AuthView({ initialMode }: AuthViewProps) {
       "Weak — add numbers or symbols",
       "Fair — needs more complexity",
       "Good — strong passphrase",
-      "Excellent hospital-grade strength",
+      "Excellent passphrase strength",
     ];
 
     return { score, text: descriptions[score] };
@@ -93,7 +96,7 @@ export function AuthView({ initialMode }: AuthViewProps) {
         return;
       }
       if (!termsAccepted) {
-        setError("Please agree to the Terms of Service and HIPAA Privacy Policy.");
+        setError("Please agree to the Terms of Service and Privacy Notice.");
         return;
       }
 
@@ -106,6 +109,7 @@ export function AuthView({ initialMode }: AuthViewProps) {
         });
 
         localStorage.setItem("token", response.data.access_token);
+        sessionStorage.removeItem("signup_email");
         router.push("/dashboard");
       } catch (err: unknown) {
         const detail = isAxiosError<{ detail?: string }>(err) ? err.response?.data?.detail : undefined;
@@ -170,10 +174,10 @@ export function AuthView({ initialMode }: AuthViewProps) {
               <span>Back to How It Works</span>
             </Link>
 
-            {/* HIPAA Badge */}
+            {/* Safety badge */}
             <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#e6f4ea] text-[#137333] border border-[#ceead6] text-xs font-semibold">
               <MIcon icon="verified_user" className="text-sm text-[#137333]" />
-              <span>HIPAA Compliant &amp; 256-Bit Encrypted</span>
+              <span>Medication details for review</span>
             </div>
 
             {/* Help Button */}
@@ -181,7 +185,7 @@ export function AuthView({ initialMode }: AuthViewProps) {
               type="button"
               onClick={() =>
                 setInfoMessage(
-                  "Need assistance? Contact our care support desk at support@aiprescriptioncompanion.org."
+                  "For medication questions, contact your pharmacist or prescriber. For urgent symptoms or a suspected overdose, contact local emergency services."
                 )
               }
               aria-label="Help"
@@ -201,7 +205,7 @@ export function AuthView({ initialMode }: AuthViewProps) {
             {/* Pill Badge */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-800 border border-sky-200/70 text-xs font-semibold w-fit">
               <MIcon icon="verified_user" className="text-sm text-[#0066cc]" />
-              <span>Patient-First Privacy Guarantee</span>
+              <span>Medication review workspace</span>
             </div>
 
             {/* Main Headline */}
@@ -211,33 +215,33 @@ export function AuthView({ initialMode }: AuthViewProps) {
 
             {/* Subtitle */}
             <p className="text-slate-600 text-base leading-relaxed max-w-xl">
-              Secure access to your prescriptions, translated into clear language with zero data
-              selling and hospital-grade encryption.
+              Bring prescription details into one place, then review the extracted information with
+              the original document and your care team.
             </p>
 
             {/* Security Micro-Cards (3 Columns) */}
             <div className="grid grid-cols-3 gap-3 pt-2">
               <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-xs text-center flex flex-col items-center justify-center">
                 <MIcon icon="lock" className="text-[#0d9488] text-xl" />
-                <div className="font-bold text-xs text-slate-800 mt-1.5">256-Bit AES</div>
+                <div className="font-bold text-xs text-slate-800 mt-1.5">Clear review</div>
                 <div className="text-[11px] text-slate-500 mt-0.5 leading-tight">
-                  Encrypted at rest
+                  Compare to original labels
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-xs text-center flex flex-col items-center justify-center">
                 <MIcon icon="verified_user" className="text-[#0d9488] text-xl" />
-                <div className="font-bold text-xs text-slate-800 mt-1.5">HIPAA BAA</div>
+                <div className="font-bold text-xs text-slate-800 mt-1.5">Organized records</div>
                 <div className="text-[11px] text-slate-500 mt-0.5 leading-tight">
-                  Care protocol signed
+                  Keep scans in one place
                 </div>
               </div>
 
               <div className="bg-white rounded-xl p-3.5 border border-slate-200/80 shadow-xs text-center flex flex-col items-center justify-center">
                 <MIcon icon="security" className="text-[#0d9488] text-xl" />
-                <div className="font-bold text-xs text-slate-800 mt-1.5">Zero Ad Tracking</div>
+                <div className="font-bold text-xs text-slate-800 mt-1.5">Care-team ready</div>
                 <div className="text-[11px] text-slate-500 mt-0.5 leading-tight">
-                  Never monetized
+                  Bring questions to a pharmacist
                 </div>
               </div>
             </div>
@@ -252,13 +256,13 @@ export function AuthView({ initialMode }: AuthViewProps) {
               </div>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 Managing complex multidose regimens for aging parents or yourself shouldn&apos;t be
-                confusing. Every answer includes verifiable source citations and simple schedule
-                instructions.
+                confusing. Use the extracted details to prepare clear questions and organize a
+                medication schedule.
               </p>
               <div className="flex flex-wrap gap-2 pt-1">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#f1f5f9] text-[#334155] text-[11px] font-bold tracking-wider uppercase border border-slate-200/70">
                   <MIcon icon="description" className="text-[13px] text-slate-500" />
-                  FDA DAILYMED CITATIONS
+                  PRESCRIPTION REVIEW
                 </span>
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#f1f5f9] text-[#334155] text-[11px] font-bold tracking-wider uppercase border border-slate-200/70">
                   <MIcon icon="contrast" className="text-[13px] text-slate-500" />
@@ -272,8 +276,8 @@ export function AuthView({ initialMode }: AuthViewProps) {
               <MIcon icon="info" className="text-[#b45309] text-lg shrink-0 mt-0.5" />
               <p className="text-xs leading-relaxed text-[#9a3412]">
                 <strong className="font-semibold text-[#7c2d12]">Clinical Safety Notice:</strong> AI
-                Prescription Companion is not a diagnostic tool. It is intended to help you interpret
-                labels, identify contraindications, and review regimens with confidence.
+                Prescription Companion is not a diagnostic tool. It helps organize prescription
+                details for you to confirm with the original label, pharmacist, or prescriber.
               </p>
             </div>
           </div>
@@ -318,8 +322,8 @@ export function AuthView({ initialMode }: AuthViewProps) {
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">
                   {mode === "signup"
-                    ? "Create an encrypted profile in under two minutes."
-                    : "Access your encrypted prescriptions and clinical insights."}
+                    ? "Create a profile to organize prescription details."
+                    : "Access your prescription records and review tools."}
                 </p>
               </div>
 
@@ -485,13 +489,13 @@ export function AuthView({ initialMode }: AuthViewProps) {
                   )}
                 </div>
 
-                {/* AES Callout Box */}
+                {/* Safety reminder */}
                 <div className="bg-[#f0f7ff] border border-[#d0e5ff] rounded-lg p-3 flex items-center gap-2.5 text-xs text-[#004085]">
                   <MIcon icon="lock" className="text-base shrink-0 text-[#0052cc]" />
                   <span>
                     {mode === "signup"
-                      ? "Encrypted with 256-bit AES at rest. We never share or monetize health data."
-                      : "Encrypted with 256-bit AES at rest. Healthcare privacy guaranteed."}
+                      ? "Use a unique password and sign out when you are on a shared device."
+                      : "Always confirm extracted medication details with the original prescription."}
                   </span>
                 </div>
 
@@ -511,7 +515,7 @@ export function AuthView({ initialMode }: AuthViewProps) {
                       </Link>{" "}
                       and acknowledge the{" "}
                       <Link href="#" className="underline font-semibold text-slate-800 hover:text-slate-950">
-                        HIPAA Privacy Policy &amp; Clinical Safety Notice
+                        Privacy Notice &amp; Clinical Safety Notice
                       </Link>
                     </span>
                   </label>
@@ -595,7 +599,7 @@ export function AuthView({ initialMode }: AuthViewProps) {
                 Privacy Policy
               </Link>
               <Link href="#" className="hover:text-slate-900 transition-colors">
-                HIPAA Compliance
+                Privacy Notice
               </Link>
               <Link href="#" className="hover:text-slate-900 transition-colors">
                 Terms of Service
