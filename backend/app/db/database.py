@@ -24,7 +24,12 @@ def get_normalized_database_url(raw_url: str) -> str:
     new_query = urllib.parse.urlencode(q, doseq=True)
     return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, new_query, parts.fragment))
 
-engine = create_async_engine(get_normalized_database_url(settings.DATABASE_URL), echo=False)
+engine = create_async_engine(
+    get_normalized_database_url(settings.DATABASE_URL),
+    echo=False,
+    pool_pre_ping=True,
+    pool_recycle=300,
+)
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,

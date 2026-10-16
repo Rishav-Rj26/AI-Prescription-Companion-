@@ -6,12 +6,22 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+import os
+
 async def download_image_from_url(url: str) -> bytes:
-    """Download image from a media/storage URL."""
-    async with httpx.AsyncClient(timeout=httpx.Timeout(30.0), follow_redirects=False) as client:
+    """Download image from a media/storage URL or local storage path."""
+    if url.startswith("/uploads/"):
+        rel_path = url.lstrip("/")
+        if os.path.exists(rel_path):
+            with open(rel_path, "rb") as f:
+                return f.read()
+        url = f"http://127.0.0.1:8000{url}"
+
+    async with httpx.AsyncClient(timeout=httpx.Timeout(30.0), follow_redirects=True) as client:
         response = await client.get(url)
         response.raise_for_status()
         return response.content
+
 
 def preprocess_image(image_bytes: bytes) -> bytes:
     """

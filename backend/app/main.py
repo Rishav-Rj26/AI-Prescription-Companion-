@@ -85,3 +85,9 @@ app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(sources.router, prefix="/sources", tags=["sources"])
 app.include_router(schedules.router, prefix="/schedules", tags=["schedules"])
 app.include_router(admin.router, prefix="/admin/dashboard", tags=["admin"])
+
+import os
+from fastapi.staticfiles import StaticFiles
+uploads_path = os.path.join(os.getcwd(), "uploads")
+os.makedirs(uploads_path, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")

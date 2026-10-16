@@ -71,10 +71,14 @@ async def upload_prescription(
     await db.commit()
     await db.refresh(prescription)
     
-    # Eagerly load pages for the response
+    # Eagerly load relations for the response
     result = await db.execute(
         select(Prescription)
-        .options(selectinload(Prescription.pages))
+        .options(
+            selectinload(Prescription.pages),
+            selectinload(Prescription.medicines),
+            selectinload(Prescription.tests),
+        )
         .where(Prescription.id == prescription.id)
     )
     return result.scalars().first()
