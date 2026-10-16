@@ -10,6 +10,7 @@ from alembic import context
 from app.config import settings
 from app.db.base import Base
 from app.db.database import get_normalized_database_url
+import app.models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
