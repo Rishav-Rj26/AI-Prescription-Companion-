@@ -15,16 +15,15 @@ export interface UseTextToSpeechReturn {
 
 export function useTextToSpeech(): UseTextToSpeechReturn {
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
-  const [isSupported, setIsSupported] = useState<boolean>(true);
+  const [isSupported] = useState<boolean>(
+    () => typeof window !== "undefined" && "speechSynthesis" in window
+  );
   const [error, setError] = useState<string | null>(null);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   // Load voices
   useEffect(() => {
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      setIsSupported(false);
-      return;
-    }
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
 
     const loadVoices = () => {
       setVoices(window.speechSynthesis.getVoices());

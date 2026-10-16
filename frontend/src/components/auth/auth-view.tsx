@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { isAxiosError } from "axios";
 import api from "@/lib/api";
 
 /* ---------- Material Symbol Helper ---------- */
@@ -87,8 +88,8 @@ export function AuthView({ initialMode }: AuthViewProps) {
         setError("Please enter a valid email address.");
         return;
       }
-      if (password.length < 8) {
-        setError("Password must be at least 8 characters long.");
+      if (password.length < 12) {
+        setError("Password must be at least 12 characters long.");
         return;
       }
       if (!termsAccepted) {
@@ -106,9 +107,10 @@ export function AuthView({ initialMode }: AuthViewProps) {
 
         localStorage.setItem("token", response.data.access_token);
         router.push("/dashboard");
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const detail = isAxiosError<{ detail?: string }>(err) ? err.response?.data?.detail : undefined;
         setError(
-          err.response?.data?.detail || "An error occurred during account creation. Please try again."
+          detail || "An error occurred during account creation. Please try again."
         );
       } finally {
         setLoading(false);
@@ -132,9 +134,10 @@ export function AuthView({ initialMode }: AuthViewProps) {
 
         localStorage.setItem("token", response.data.access_token);
         router.push("/dashboard");
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const detail = isAxiosError<{ detail?: string }>(err) ? err.response?.data?.detail : undefined;
         setError(
-          err.response?.data?.detail || "Invalid email or password. Please verify your credentials."
+          detail || "Invalid email or password. Please verify your credentials."
         );
       } finally {
         setLoading(false);
@@ -392,7 +395,7 @@ export function AuthView({ initialMode }: AuthViewProps) {
                       <span className="text-red-500">*</span>
                     </label>
                     {mode === "signup" ? (
-                      <span className="text-[11px] text-slate-500">Min. 8 characters</span>
+                      <span className="text-[11px] text-slate-500">Min. 12 characters</span>
                     ) : (
                       <button
                         type="button"

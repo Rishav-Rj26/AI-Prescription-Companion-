@@ -2,13 +2,14 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
-import { usePrescription, useProcessPrescription, useVerifyPrescription } from "@/lib/queries/prescriptions";
+import { isAxiosError } from "axios";
+import { usePrescription, useProcessPrescription, useVerifyPrescription, type FieldConfirmation } from "@/lib/queries/prescriptions";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, BrainCircuit, AlertTriangle, FileText, Activity, AlertCircle, Clock, CheckCircle2, Bot } from "lucide-react";
+import { ArrowLeft, BrainCircuit, AlertTriangle, FileText, Activity, AlertCircle, CheckCircle2, Bot } from "lucide-react";
 import { PrescriptionMedicine } from "@/types/prescription";
 import { TextToSpeechButton } from "@/components/ui/text-to-speech-button";
 import { useCurrentUser } from "@/lib/queries/user";
@@ -47,7 +48,7 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
             </div>
             <div className="space-y-1">
               <h3 className="font-semibold text-[#93000a]">Prescription not found</h3>
-              <p className="text-sm text-[#93000a]">The prescription you're looking for doesn't exist or you don't have access.</p>
+              <p className="text-sm text-[#93000a]">The prescription you&apos;re looking for doesn&apos;t exist or you don&apos;t have access.</p>
             </div>
             <Button variant="outline" onClick={() => router.push("/dashboard")} className="mt-4">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Dashboard
@@ -73,7 +74,7 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
     }
   };
 
-  const handleVerifySubmit = (medId: number, fieldName: string, value: string) => {
+  const handleVerifySubmit = (medId: number, fieldName: FieldConfirmation["field_name"], value: string) => {
     verifyPrescription({
       id: prescription.id,
       confirmations: [
@@ -254,7 +255,7 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
             <AlertTriangle className="h-5 w-5" />
             <AlertTitle>Processing Error</AlertTitle>
             <AlertDescription>
-              {(processError as any).response?.data?.detail || "Failed to process prescription. Please try again later."}
+              {(isAxiosError<{ detail?: string }>(processError) ? processError.response?.data?.detail : undefined) || "Failed to process prescription. Please try again later."}
             </AlertDescription>
           </Alert>
         )}
@@ -275,14 +276,18 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
               </div>
             </div>
             <div className="relative flex-1 bg-surface-container-highest/60 overflow-y-auto p-4 space-y-4">
-              {prescription.pages.map((page, idx) => (
+              {prescription.pages.map((page) => (
                 <div key={page.id} className="bg-white rounded-lg shadow-sm border border-outline-variant/60 overflow-hidden">
                   <div className="bg-surface-container border-b border-outline-variant p-2 px-3 flex justify-between items-center text-xs text-on-surface-variant font-medium">
                     <span>Page {page.page_number}</span>
                     {page.file_size_bytes && <span>{Math.round(page.file_size_bytes / 1024)} KB</span>}
                   </div>
                   {page.file_type.startsWith('image/') ? (
-                    <img src={page.file_url} alt={`Prescription page ${page.page_number}`} className="w-full object-contain" />
+                    <>
+                      {/* Uploaded images come from the configured storage provider. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={page.file_url} alt={`Prescription page ${page.page_number}`} className="w-full object-contain" />
+                    </>
                   ) : (
                     <div className="p-8 text-center text-on-surface-variant flex flex-col items-center">
                       <FileText className="h-12 w-12 mb-2 text-outline" />
@@ -451,7 +456,7 @@ export default function PrescriptionViewer({ params }: { params: Promise<{ id: s
                 <div>
                   <h3 className="font-headline-md text-headline-md font-bold text-on-surface">Ready for Analysis</h3>
                   <p className="font-body-md text-body-md text-on-surface-variant max-w-sm mt-2">
-                    Click "Process with AI" to extract medicines, dosages, and tests from this prescription.
+                    Click &quot;Process with AI&quot; to extract medicines, dosages, and tests from this prescription.
                   </p>
                 </div>
               </div>

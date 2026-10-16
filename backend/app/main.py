@@ -27,6 +27,8 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
     response.headers["Cache-Control"] = "no-store"
+    response.headers["Permissions-Policy"] = "camera=(self), microphone=(self), geolocation=()"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-site"
     logger.info("%s %s -> %s in %dms", request.method, request.url.path,
                 response.status_code, (time.perf_counter() - started) * 1000)
     return response

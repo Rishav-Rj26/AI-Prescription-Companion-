@@ -1,15 +1,15 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 from typing import Optional
 
 class UserCreate(BaseModel):
     email: EmailStr
-    password: str
-    full_name: Optional[str] = None
+    password: str = Field(min_length=12, max_length=128)
+    full_name: Optional[str] = Field(default=None, max_length=120)
 
 class UserLogin(BaseModel):
     email: EmailStr
-    password: str
+    password: str = Field(min_length=1, max_length=128)
 
 class UserResponse(BaseModel):
     id: int
@@ -23,7 +23,7 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 class UserSettingsUpdate(BaseModel):
-    preferred_language: str
+    preferred_language: str = Field(pattern="^(en|hi)$")
 
 class Token(BaseModel):
     access_token: str

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { format, addDays, subDays, isToday, parseISO } from "date-fns";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, CheckCircle2, XCircle, Bell, AlertTriangle, Loader2, ShieldCheck, Activity, FileText } from "lucide-react";
+import { format, addDays, subDays, isToday } from "date-fns";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, CheckCircle2, XCircle, Bell, AlertTriangle, Loader2, ShieldCheck, Activity, FileText } from "lucide-react";
 import { useSchedules, useUpdateSchedule } from "@/lib/queries/schedules";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -131,7 +131,7 @@ export default function SchedulePage() {
           <div className="text-center py-20 bg-surface-container-lowest rounded-2xl border border-outline-variant border-dashed tier-1-card">
             <CalendarIcon className="h-12 w-12 text-outline mx-auto mb-4" />
             <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">No medications scheduled</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant mt-2">You don't have any doses scheduled for this day.</p>
+            <p className="font-body-md text-body-md text-on-surface-variant mt-2">You don&apos;t have any doses scheduled for this day.</p>
           </div>
         ) : (
           <div className="space-y-8">

@@ -18,9 +18,8 @@ class SourceResponse(BaseModel):
 @router.get("/{id}", response_model=SourceResponse)
 async def get_source(
     id: int,
-    db: AsyncSession = Depends(get_db)
-    # We do not strictly require current_user if sources are public, but for security:
-    # current_user = Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     result = await db.execute(
         select(KnowledgeDocument).where(KnowledgeDocument.id == id)

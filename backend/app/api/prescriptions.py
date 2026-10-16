@@ -11,7 +11,7 @@ from app.models.prescription import Prescription
 from app.models.prescription_page import PrescriptionPage
 from app.schemas.prescription import PrescriptionResponse, PrescriptionListResponse, VerifyRequest
 from app.api.deps import get_current_user
-from app.services.storage import upload_prescription_page
+from app.services.storage import upload_prescription_page, delete_prescription_page
 from app.ai.pipeline import process_prescription_pipeline
 from app.models.medicine import PrescriptionMedicine
 from app.models.test import Test
@@ -35,6 +35,7 @@ async def upload_prescription(
     await db.flush()  # Get ID without committing
 
     pages = []
+    uploaded_resources: list[tuple[str, str]] = []
     # 2. Process and upload each file
     for i, file in enumerate(files):
         try:
@@ -50,10 +51,13 @@ async def upload_prescription(
             )
             db.add(page)
             pages.append(page)
-        except Exception as e:
-            # If any upload fails, rollback DB and raise
+            uploaded_resources.append((upload_result["public_id"], upload_result["resource_type"]))
+        except Exception:
+            # If any upload fails, roll back both database state and uploaded files.
             await db.rollback()
-            raise e
+            for public_id, resource_type in uploaded_resources:
+                delete_prescription_page(public_id, resource_type)
+            raise
             
     await db.commit()
     await db.refresh(prescription)

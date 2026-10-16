@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Mic, MicOff, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { MicPermissionDialog } from "./mic-permission-dialog";
@@ -14,8 +14,9 @@ interface VoiceInputButtonProps {
 
 export function VoiceInputButton({ onTranscriptComplete, language = "en", disabled = false }: VoiceInputButtonProps) {
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
-  const [hasSeenPermissionDialog, setHasSeenPermissionDialog] = useState(false);
-  const [localError, setLocalError] = useState<string | null>(null);
+  const [hasSeenPermissionDialog, setHasSeenPermissionDialog] = useState(
+    () => typeof window !== "undefined" && localStorage.getItem("mic_permission_seen") === "true"
+  );
   
   const { 
     isListening, 
@@ -26,24 +27,6 @@ export function VoiceInputButton({ onTranscriptComplete, language = "en", disabl
     transcript,
     resetTranscript 
   } = useSpeechRecognition();
-
-  // Load permission state on mount
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const seen = localStorage.getItem("mic_permission_seen") === "true";
-      setHasSeenPermissionDialog(seen);
-    }
-  }, []);
-
-  // Handle STT errors
-  useEffect(() => {
-    if (error) {
-      setLocalError(error);
-      // Auto-clear error after 5s
-      const timer = setTimeout(() => setLocalError(null), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   // If unsupported by browser, hide completely
   if (!isSupported) {
@@ -91,9 +74,9 @@ export function VoiceInputButton({ onTranscriptComplete, language = "en", disabl
       </Button>
 
       {/* Error Tooltip overlay */}
-      {localError && !isListening && (
+      {error && !isListening && (
         <div className="absolute bottom-full mb-2 right-0 w-64 bg-red-600 text-white text-xs p-2 rounded shadow-lg z-50 animate-in fade-in slide-in-from-bottom-2">
-          {localError}
+          {error}
           <div className="absolute top-full right-4 border-4 border-transparent border-t-red-600" />
         </div>
       )}

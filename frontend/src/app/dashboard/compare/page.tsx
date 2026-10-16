@@ -5,9 +5,7 @@ import { Loader2, GitCompareArrows, AlertCircle, Plus, Minus, FileText } from "l
 import { usePrescriptions } from "@/lib/queries/prescriptions";
 import { useComparePrescriptions } from "@/lib/queries/comparison";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 
 export default function ComparePage() {

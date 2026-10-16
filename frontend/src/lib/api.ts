@@ -33,10 +33,10 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response && error.response.status === 401) {
-      // Clear token and redirect to login if unauthorized
+        // Clear the token and let the React router perform the navigation.
       if (typeof window !== "undefined") {
         localStorage.removeItem("token");
-        window.location.href = "/login";
+          window.dispatchEvent(new Event("authentication-expired"));
       }
     }
     return Promise.reject(error);

@@ -2,11 +2,36 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 
-// Add global types for Web Speech API since they might not be fully typed in TS
+interface SpeechRecognitionResultLike {
+  0: { transcript: string };
+}
+
+interface SpeechRecognitionEventLike {
+  results: ArrayLike<SpeechRecognitionResultLike>;
+}
+
+interface SpeechRecognitionErrorEventLike {
+  error: string;
+}
+
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
 declare global {
   interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
   }
 }
 
@@ -23,25 +48,24 @@ export interface UseSpeechRecognitionReturn {
 export function useSpeechRecognition(): UseSpeechRecognitionReturn {
   const [transcript, setTranscript] = useState<string>("");
   const [isListening, setIsListening] = useState<boolean>(false);
-  const [isSupported, setIsSupported] = useState<boolean>(true);
+  const [isSupported, setIsSupported] = useState<boolean>(
+    () => typeof window !== "undefined" && Boolean(window.SpeechRecognition || window.webkitSpeechRecognition)
+  );
   const [error, setError] = useState<string | null>(null);
 
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setIsSupported(false);
-      return;
-    }
+    if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
     recognition.continuous = true; // Keep listening until explicitly stopped
     recognition.interimResults = true; // Get interim results for better UX
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEventLike) => {
       let fullTranscript = "";
       for (let i = 0; i < event.results.length; ++i) {
         fullTranscript += event.results[i][0].transcript;
@@ -49,7 +73,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       setTranscript(fullTranscript);
     };
 
-    recognition.onerror = (event: any) => {
+    recognition.onerror = (event: SpeechRecognitionErrorEventLike) => {
       console.error("Speech recognition error:", event.error);
       setIsListening(false);
       
@@ -101,9 +125,10 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       
       recognitionRef.current.start();
       setIsListening(true);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to start listening:", err);
-      if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+      const name = err instanceof DOMException ? err.name : "";
+      if (name === 'NotAllowedError' || name === 'SecurityError') {
         setError("Microphone access denied. Please enable it in your browser settings.");
         setIsSupported(false);
       } else {

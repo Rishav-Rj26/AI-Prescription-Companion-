@@ -2,14 +2,12 @@
 
 import { use, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { usePrescription } from "@/lib/queries/prescriptions";
 import { useChatSessions, useCreateChatSession, useChatSession, useSendMessage } from "@/lib/queries/chat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Send, User as UserIcon, Bot, BookOpen, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
-import { ChatSession, ChatMessage, Citation } from "@/types/chat";
+import { Citation } from "@/types/chat";
 import { VoiceInputButton } from "@/components/ui/voice-input-button";
 import { TextToSpeechButton } from "@/components/ui/text-to-speech-button";
 import { useCurrentUser } from "@/lib/queries/user";
@@ -20,12 +18,13 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
   const prescriptionId = parseInt(resolvedParams.id, 10);
   const router = useRouter();
 
-  const { data: prescription } = usePrescription(prescriptionId);
   const { data: sessions, isLoading: sessionsLoading } = useChatSessions();
   const { mutateAsync: createSession, isPending: isCreating } = useCreateChatSession();
   const { mutateAsync: sendMessage, isPending: isSending } = useSendMessage();
 
-  const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
+  const [createdSessionId, setCreatedSessionId] = useState<number | null>(null);
+  const existingSessionId = sessions?.find((session) => session.prescription_id === prescriptionId)?.id ?? null;
+  const activeSessionId = createdSessionId ?? existingSessionId;
   const { data: activeSession, isLoading: sessionLoading, refetch } = useChatSession(activeSessionId || 0);
   const { data: user } = useCurrentUser();
 
@@ -35,17 +34,10 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
 
   // Initialize session
   useEffect(() => {
-    if (sessions && sessions.length >= 0 && !activeSessionId && !sessionsLoading) {
-      // Find session for this prescription
-      const existingSession = sessions.find(s => s.prescription_id === prescriptionId);
-      if (existingSession) {
-        setActiveSessionId(existingSession.id);
-      } else if (!isCreating) {
-        // Create new session
-        createSession(prescriptionId).then(newSession => {
-          setActiveSessionId(newSession.id);
-        });
-      }
+    if (sessions && !activeSessionId && !sessionsLoading && !isCreating) {
+      createSession(prescriptionId).then((newSession) => {
+        setCreatedSessionId(newSession.id);
+      });
     }
   }, [sessions, prescriptionId, activeSessionId, sessionsLoading, createSession, isCreating]);
 
@@ -92,9 +84,9 @@ export default function ChatPage({ params }: { params: Promise<{ id: string }> }
               <BookOpen className="h-3.5 w-3.5 text-[#2e7977]" /> Verified Sources:
             </span>
             <div className="flex flex-wrap gap-2">
-              {citations.map((cite, idx) => (
+              {citations.map((cite) => (
                 <button
-                  key={idx} 
+                  key={cite.source_id}
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f0f4f8] border border-[#cbd5e1] text-[#1e4263] hover:bg-[#e2eaf1] text-[12px] font-semibold tracking-[0.02em] uppercase transition-colors cursor-pointer"
                   onClick={() => openSource(cite.source_id)}
                 >

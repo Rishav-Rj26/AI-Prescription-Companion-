@@ -54,6 +54,7 @@ async def upload_prescription_page(file: UploadFile, user_id: int, prescription_
             folder=folder,
             public_id=file_uid,
             resource_type=resource_type,
+            type="authenticated",
         )
     except StorageException:
         raise HTTPException(status_code=500, detail="Failed to upload file to storage.")
@@ -68,4 +69,14 @@ async def upload_prescription_page(file: UploadFile, user_id: int, prescription_
         "file_size_bytes": file_size,
         "original_filename": file.filename,
         "public_id": response.get("public_id", f"{folder}/{file_uid}"),
+        "resource_type": resource_type,
     }
+
+
+def delete_prescription_page(public_id: str, resource_type: str) -> None:
+    """Best-effort cleanup for an upload whose database transaction failed."""
+    try:
+        cloudinary_client.delete(public_id, resource_type=resource_type, type="authenticated")
+    except StorageException:
+        # Never mask the original upload/transaction error with cleanup failure.
+        pass

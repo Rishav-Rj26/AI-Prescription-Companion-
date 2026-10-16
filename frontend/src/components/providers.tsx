@@ -1,9 +1,11 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
       queries: {
@@ -12,6 +14,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
       },
     },
   }));
+
+  useEffect(() => {
+    const redirectToLogin = () => router.replace("/login");
+    window.addEventListener("authentication-expired", redirectToLogin);
+    return () => window.removeEventListener("authentication-expired", redirectToLogin);
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>

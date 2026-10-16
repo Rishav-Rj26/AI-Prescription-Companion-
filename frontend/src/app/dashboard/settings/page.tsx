@@ -1,23 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Loader2, Save, Globe } from "lucide-react";
 import { useCurrentUser, useUpdateSettings } from "@/lib/queries/user";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function SettingsPage() {
   const { data: user, isLoading } = useCurrentUser();
   const { mutate: updateSettings, isPending } = useUpdateSettings();
-  const [language, setLanguage] = useState<string>("en");
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const [showSaved, setShowSaved] = useState(false);
-
-  useEffect(() => {
-    if (user?.preferred_language) {
-      setLanguage(user.preferred_language);
-    }
-  }, [user]);
+  const language = selectedLanguage ?? user?.preferred_language ?? "en";
 
   const handleSave = () => {
     updateSettings({ preferred_language: language }, {
@@ -131,7 +124,7 @@ export default function SettingsPage() {
                   {/* English Card */}
                   <label 
                     className={`relative flex flex-col p-4 rounded-xl cursor-pointer shadow-sm transition ${language === 'en' ? 'border-2 border-primary bg-surface-container-low' : 'border border-outline-variant hover:border-primary-container bg-surface-container-lowest'}`}
-                    onClick={() => setLanguage('en')}
+                    onClick={() => setSelectedLanguage('en')}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -150,7 +143,7 @@ export default function SettingsPage() {
                   {/* Hindi Card */}
                   <label 
                     className={`relative flex flex-col p-4 rounded-xl cursor-pointer shadow-sm transition ${language === 'hi' ? 'border-2 border-primary bg-surface-container-low' : 'border border-outline-variant hover:border-primary-container bg-surface-container-lowest'}`}
-                    onClick={() => setLanguage('hi')}
+                    onClick={() => setSelectedLanguage('hi')}
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">

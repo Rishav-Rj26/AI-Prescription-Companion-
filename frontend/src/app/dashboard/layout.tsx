@@ -1,6 +1,5 @@
 import Link from 'next/link';
-import { Pill, Plus, HelpCircle, FileText, Calendar, Activity, ShieldCheck, Lock } from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import { Pill, Plus, HelpCircle, ShieldCheck } from 'lucide-react';
 
 export default function DashboardLayout({
   children,

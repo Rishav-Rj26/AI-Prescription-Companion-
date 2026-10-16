@@ -2,11 +2,10 @@
 
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 import { Upload, X, ArrowUp, ArrowDown, Camera, CheckCircle2, AlertCircle, Loader2, FileText, Lock } from "lucide-react";
 import { useUploadPrescription } from "@/lib/queries/prescriptions";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "application/pdf"];
 const MAX_SIZE = 10 * 1024 * 1024; // 10MB
@@ -96,8 +95,9 @@ export default function UploadPage() {
       onSuccess: () => {
         setTimeout(() => router.push("/dashboard"), 1500);
       },
-      onError: (err: any) => {
-        setError(err.response?.data?.detail || "Upload failed. Please try again.");
+      onError: (err) => {
+        const detail = isAxiosError<{ detail?: string }>(err) ? err.response?.data?.detail : undefined;
+        setError(detail || "Upload failed. Please try again.");
       }
     });
   };
@@ -110,7 +110,7 @@ export default function UploadPage() {
           <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5 sm:mt-0" />
           <p className="font-body-md text-body-md text-on-surface flex-1">
             <strong className="font-headline-sm text-headline-sm text-primary font-bold mr-1">Clinical Safety Reminder:</strong> 
-            AI Prescription Companion extracts and organizes medication label details for review. It does not replace your doctor or pharmacist's medical judgment.
+            AI Prescription Companion extracts and organizes medication label details for review. It does not replace your doctor&apos;s or pharmacist&apos;s medical judgment.
           </p>
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-lowest border border-outline-variant rounded-md text-on-surface-variant font-label-sm text-label-sm flex-shrink-0">
             <CheckCircle2 className="h-4 w-4" />
@@ -220,6 +220,8 @@ export default function UploadPage() {
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
                         {files.map((file, idx) => (
                           <div key={`${file.name}-${idx}`} className="relative group rounded-xl border border-outline-variant overflow-hidden bg-surface-container-lowest aspect-[3/4] shadow-sm">
+                            {/* Object URLs from local files cannot be processed by next/image. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={previews[idx]} alt={`Page ${idx + 1}`} className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
                               <div className="flex justify-between">
@@ -262,7 +264,7 @@ export default function UploadPage() {
               <ul className="space-y-3 font-body-md text-body-md text-[#78350F]">
                 <li className="flex items-start gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#78350F] mt-2 shrink-0"></span>
-                  <span><strong>Include the entire label:</strong> Ensure doctor's name, medication name, dosage instructions, and patient name are visible.</span>
+                  <span><strong>Include the entire label:</strong> Ensure doctor&apos;s name, medication name, dosage instructions, and patient name are visible.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#78350F] mt-2 shrink-0"></span>

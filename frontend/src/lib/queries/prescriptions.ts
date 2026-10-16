@@ -2,6 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { Prescription, PrescriptionListResponse } from "@/types/prescription";
 
+export type FieldConfirmation = {
+  medicine_id?: number;
+  test_id?: number;
+  field_name: "extracted_name" | "strength" | "dosage" | "frequency" | "duration" | "instructions" | "test_name" | "description";
+  confirmed_value: string;
+};
+
 export const usePrescriptions = () => {
   return useQuery({
     queryKey: ["prescriptions"],
@@ -78,7 +85,7 @@ export const useVerifyPrescription = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, confirmations }: { id: number, confirmations: any[] }): Promise<Prescription> => {
+    mutationFn: async ({ id, confirmations }: { id: number, confirmations: FieldConfirmation[] }): Promise<Prescription> => {
       const { data } = await api.post(`/prescriptions/${id}/verify`, { confirmations });
       return data;
     },

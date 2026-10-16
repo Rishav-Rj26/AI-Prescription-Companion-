@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, FileText, ArrowRight, CheckCircle2, Clock, Calendar, AlertTriangle, Pill } from "lucide-react";
+import { Plus, CheckCircle2, Clock, Calendar } from "lucide-react";
 import { usePrescriptions } from "@/lib/queries/prescriptions";
 import { useSchedules, useUpdateSchedule } from "@/lib/queries/schedules";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 export default function DashboardHomePage() {
@@ -72,7 +71,7 @@ export default function DashboardHomePage() {
                 <div className="py-10 text-center bg-surface-container-low/50 rounded-xl border border-dashed border-outline-variant/60">
                   <Calendar className="h-8 w-8 text-outline mx-auto mb-3" />
                   <p className="text-on-surface font-headline-sm text-headline-sm font-bold">No upcoming doses</p>
-                  <p className="font-body-md text-body-md text-on-surface-variant mt-1">You're all caught up for now!</p>
+                  <p className="font-body-md text-body-md text-on-surface-variant mt-1">You&apos;re all caught up for now!</p>
                 </div>
               ) : (
                 <div className="space-y-3">
