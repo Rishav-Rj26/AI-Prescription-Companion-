@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 async def download_image_from_url(url: str) -> bytes:
-    """Download image from a public S3 URL."""
+    """Download image from a media/storage URL."""
     async with httpx.AsyncClient(timeout=httpx.Timeout(30.0), follow_redirects=False) as client:
         response = await client.get(url)
         response.raise_for_status()

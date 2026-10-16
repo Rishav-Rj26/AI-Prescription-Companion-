@@ -14,7 +14,7 @@ A patient-facing assistant that converts prescription documents into structured 
 
 - **Web client:** Next.js, TypeScript, Tailwind CSS, shadcn/ui, React Query.
 - **API:** FastAPI, SQLAlchemy async, Pydantic validation, JWT authentication.
-- **Data:** PostgreSQL with pgvector, Alembic migrations, and S3-compatible object storage.
+- **Data:** PostgreSQL with pgvector, Alembic migrations, and Cloudinary media storage.
 - **AI:** Gemini structured extraction, confidence gating, normalization, and retrieval.
 
 ## Local development
@@ -46,8 +46,8 @@ npm run build
 
 ## Deployment checklist
 
-- Use a managed secret store for the JWT, database, AWS, and Gemini credentials.
-- Restrict S3 access; avoid public patient documents and use short-lived signed URLs where applicable.
+- Use a managed secret store for the JWT, database, Cloudinary, and Gemini credentials.
+- Restrict storage access; avoid public patient documents and use signed delivery URLs where applicable.
 - Set explicit HTTPS origins in `CORS_ORIGINS`; terminate TLS before traffic reaches the API.
 - Run database migrations as a controlled deployment step and back up the database.
 - Send structured application errors and latency metrics to monitored logging; never log prescription content, access tokens, or credentials.
