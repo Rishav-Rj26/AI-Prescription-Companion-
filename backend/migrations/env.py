@@ -9,11 +9,12 @@ from alembic import context
 
 from app.config import settings
 from app.db.base import Base
+from app.db.database import get_normalized_database_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", get_normalized_database_url(settings.DATABASE_URL))
 
 # add your model's MetaData object here
 # for 'autogenerate' support
