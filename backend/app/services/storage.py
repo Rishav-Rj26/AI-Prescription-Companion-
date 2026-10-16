@@ -1,16 +1,14 @@
 import uuid
-import boto3
 from fastapi import UploadFile, HTTPException
-from botocore.exceptions import ClientError
 from app.config import settings
+from app.services import cloudinary_client
+from app.services.cloudinary_client import StorageException
 
-# Initialize S3 client
-s3_client = boto3.client(
-    "s3",
-    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-    region_name=settings.AWS_S3_REGION,
-)
+# Re-export storage module methods
+upload = cloudinary_client.upload
+delete = cloudinary_client.delete
+get_url = cloudinary_client.get_url
+list = cloudinary_client.list_resources
 
 ALLOWED_TYPES = {"image/jpeg": ".jpg", "image/png": ".png", "application/pdf": ".pdf"}
 
@@ -26,8 +24,9 @@ def _validate_file_signature(content_type: str, header: bytes) -> None:
 
 async def upload_prescription_page(file: UploadFile, user_id: int, prescription_id: int) -> dict:
     """
-    Validates and uploads a single prescription page to AWS S3.
+    Validates and uploads a single prescription page to Cloudinary.
     Never logs raw file contents or stores them on local disk.
+    Preserves existing function signature and response structure.
     """
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=400, detail=f"Unsupported file type: {file.content_type}. Must be jpeg, png, or pdf.")
@@ -40,30 +39,33 @@ async def upload_prescription_page(file: UploadFile, user_id: int, prescription_
     if file_size == 0:
         raise HTTPException(status_code=400, detail="Empty files cannot be uploaded.")
     if file_size > settings.MAX_UPLOAD_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail=f"File too large. Maximum allowed size is 10MB.")
+        raise HTTPException(status_code=400, detail="File too large. Maximum allowed size is 10MB.")
     _validate_file_signature(file.content_type, file.file.read(16))
     file.file.seek(0)
         
-    # Generate unique filename for S3
-    ext = ALLOWED_TYPES[file.content_type]
-    s3_key = f"prescriptions/user_{user_id}/presc_{prescription_id}/{uuid.uuid4()}{ext}"
+    # Map S3 concepts: Bucket/Key -> Cloudinary Folder/Public ID
+    folder = f"prescriptions/user_{user_id}/presc_{prescription_id}"
+    file_uid = str(uuid.uuid4())
+    resource_type = "auto" if file.content_type == "application/pdf" else "image"
     
     try:
-        # Upload directly from memory/spooled file to S3
-        s3_client.upload_fileobj(
+        response = cloudinary_client.upload(
             file.file,
-            settings.AWS_S3_BUCKET_NAME,
-            s3_key,
-            ExtraArgs={"ContentType": file.content_type}
+            folder=folder,
+            public_id=file_uid,
+            resource_type=resource_type,
         )
-    except ClientError as e:
+    except StorageException:
         raise HTTPException(status_code=500, detail="Failed to upload file to storage.")
         
-    s3_url = f"https://{settings.AWS_S3_BUCKET_NAME}.s3.{settings.AWS_S3_REGION}.amazonaws.com/{s3_key}"
+    file_url = response.get("secure_url") or response.get("url") or cloudinary_client.get_url(
+        f"{folder}/{file_uid}", resource_type=resource_type
+    )
     
     return {
-        "file_url": s3_url,
+        "file_url": file_url,
         "file_type": file.content_type,
         "file_size_bytes": file_size,
-        "original_filename": file.filename
+        "original_filename": file.filename,
+        "public_id": response.get("public_id", f"{folder}/{file_uid}"),
     }

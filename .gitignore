@@ -11,11 +11,16 @@ Thumbs.db
 # Uploads
 uploads/
 
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
 # Backend
 backend/venv/
 backend/env/
 backend/.venv/
-backend/__pycache__/
 
 # Frontend
 frontend/node_modules/
